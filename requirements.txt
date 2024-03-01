@@ -1,0 +1,10 @@
+gymnasium
+matplotlib
+numpy
+pandas
+rich
+stable-baselines3==2.1.0
+tabulate
+tensorflow
+tqdm
+websockets
