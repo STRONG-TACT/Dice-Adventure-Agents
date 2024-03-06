@@ -8,7 +8,7 @@ ACTION_LIST = ["up", "down", "left", "right", "wait", "undo", "submit", "pinga",
 
 
 def main():
-    # Get agent
+    # Load agent
     agent = DiceAdventureAgent()
     agent.load(AGENT_FILEPATH)
     # Set up environment
