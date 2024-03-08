@@ -12,7 +12,7 @@ def main():
     agent = DiceAdventureAgent()
     agent.load(AGENT_FILEPATH)
     # Set up environment
-    env = DiceAdventurePythonEnv(player=PLAYER, server=SERVER, train_mode=False, render=True)
+    env = DiceAdventurePythonEnv(player=PLAYER, server=SERVER, train_mode=False)
     obs = env.reset()[0]
 
     while True:
