@@ -10,7 +10,6 @@ ACTION_LIST = ["up", "down", "left", "right", "wait", "undo", "submit", "pinga",
 def main():
     # Load agent
     agent = DiceAdventureAgent()
-    agent.load(AGENT_FILEPATH)
     # Set up environment
     env = DiceAdventurePythonEnv(player=PLAYER, server=SERVER, train_mode=False)
     obs = env.reset()[0]
