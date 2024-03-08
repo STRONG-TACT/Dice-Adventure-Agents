@@ -2,6 +2,7 @@
 from random import choice
 
 
+
 class DiceAdventureAgent:
     """
     Provides a uniform interface to connect agents to Dice Adventure environment.
@@ -26,8 +27,8 @@ class DiceAdventureAgent:
         """
         Given a game state and list of actions, the agent should determine which action to take and return a
         string representation of the action.
-        :param state: (dict) A 'Dice Adventure' game state
+        :param state:   (dict) A 'Dice Adventure' game state
         :param actions: (list) A list of string action names
-        :return: (string) An action from the 'actions' list
+        :return:        (string) An action from the 'actions' list
         """
         return choice(actions)
