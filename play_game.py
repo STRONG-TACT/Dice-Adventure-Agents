@@ -12,12 +12,13 @@ def main():
     agent = DiceAdventureAgent()
     agent.load(AGENT_FILEPATH)
     # Set up environment
-    env = DiceAdventurePythonEnv(player=PLAYER, server=SERVER, train_mode=False)
+    env = DiceAdventurePythonEnv(player=PLAYER, server=SERVER, train_mode=False, render=True)
     obs = env.reset()[0]
 
     while True:
         action = agent.take_action(state=obs, actions=ACTION_LIST)
         obs = env.step(action)
+        # env.render()
 
 
 if __name__ == "__main__":
