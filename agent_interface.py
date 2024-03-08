@@ -1,4 +1,7 @@
 # PLEASE IMPORT ANY PACKAGES YOU NEED
+from random import choice
+
+
 class DiceAdventureAgent:
     """
     Provides a uniform interface to connect agents to Dice Adventure environment.
@@ -27,4 +30,4 @@ class DiceAdventureAgent:
         :param actions: (list) A list of string action names
         :return: (string) An action from the 'actions' list
         """
-        pass
+        return choice(actions)
