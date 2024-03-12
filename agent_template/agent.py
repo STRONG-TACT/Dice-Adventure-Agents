@@ -1,7 +1,4 @@
 # PLEASE IMPORT ANY PACKAGES YOU NEED
-from random import choice
-
-
 
 class DiceAdventureAgent:
     """
