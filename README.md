@@ -3,9 +3,13 @@ Welcome! This repository contains skeleton code to develop and train agents to p
 at Carnegie Mellon University and Georgia Institute of Technology. The README serves as documentation for DA, how to
 use the code in this repository, and information on the challenge itself.
 
-- [Challenge Documentation](#challenge-docu)
 - [Dice Adventure Documentation](#dice-adventure-documentation)
+- [Challenge Documentation](#challenge-documentation)
 - [How to use code](#how-to-use-code)
+  - [Install required packages](#install-required-packages)
+  - [Run the sample code](#run-the-sample-code)
+  - [Develop your agents](#develop-your-agents)
+  - [Agent Submission](#agent-submission)
 
 
 ## Dice Adventure Documentation
@@ -13,13 +17,18 @@ Dice Adventure is a 3D, turn-based, dungeon crawler game created at Carnegie Mel
 game design team in support of an Army Research Lab project on human-machine teaming (HMT). [Dr. Christopher MacLellan's](https://chrismaclellan.com/) 
 Teachable AI Lab (TAIL) at the Georgia Institute of Technology supports the artificial intelligence development aspect 
 of the project. DA was designed to explore paradigms in HMT related to the Army mission (*maybe link to HMT paradigms? Is that open info or FOUO?*). As such, DA's design integrates
-concepts such as denied communication environments, *thing2*, and *thing3*.  
+concepts such as denied communication environments, *thing2*, and *thing3* (~update~).  
 
-You can find a tutorial of how DA works [here](https://www.com). (~update~)  
+You can find a complete game documentation [here](https://www.com). (~update~)
+
 ## Challenge Documentation
 In order to conduct research into some of the human-machine teaming
 
 (*Insert link to challenge rules?*)
+
+### Agent Submission
+(Need to add general submission details)
+To learn which code files you should submit, please see [here](#code-submission).
 
 ## How to use code
 Although Dice Adventure (DA) was implemented in Unity and your agents will ultimately interface with the Unity version, 
@@ -29,7 +38,8 @@ these steps to set up your environment to use both the local and Unity versions 
 
 ### Install required packages
 Install the required packages using the `requirements.txt` file in order for DA to run. You may add additional packages
-needed for your agents to this file.
+needed for your agents to this file. Please note that we specified package versions to maintain consistency across this
+project. If you encounter errors installing any of these versions, please [reach out to our team](#contact-information) for a resolution. 
 
 ```sh
   pip install -r requirements.txt
@@ -59,7 +69,15 @@ the `server` class declaration parameter and can be used to avoid setting up you
 No matter the type of agent you develop, you can add additional functions to the environment as needed to support training.
 Each function is documented in the file.
 
-### Agent Submission
+### Code Submission
 Agents should be submitted at [this link]() (~update~) before the deadline. In your submission, please include a zip file 
 of your `agent.py` file containing your agent implemented in the `DiceAdventureAgent` class, the `dice_adventure_python_env.py`
-file, and any other model files needed to load in your agent. 
+file, a `requirements.txt` file containing any packages your model needs to run, and any other model files needed to 
+load in your agent.
+
+### Contact Information
+
+| Name | Position | Contact | 
+|------|----------|--------|
+| 1    | 2        |3|
+| 4    | 5        |6|
