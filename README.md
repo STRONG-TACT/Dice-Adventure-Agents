@@ -22,7 +22,7 @@ concepts such as denied communication environments, *thing2*, and *thing3* (~upd
 You can find a complete game documentation [here](https://www.com). (~update~)
 
 ## Challenge Documentation
-In order to conduct research into some of the human-machine teaming
+In order to conduct research into some of the human-machine teaming [website](https://strong-tact.github.io/)
 
 (*Insert link to challenge rules?*)
 
