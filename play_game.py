@@ -1,9 +1,8 @@
-from game.env.dice_adventure_python_env import DiceAdventurePythonEnv
-from agent_interface import DiceAdventureAgent
+from examples.random_agent.dice_adventure_python_env import DiceAdventurePythonEnv
+from examples.random_agent.agent import DiceAdventureAgent
 
-PLAYER = "Giant"
-SERVER = "local"  # {local, unity}
-AGENT_FILEPATH = "path/to/agent"
+PLAYERS = ["dwarf", "giant", "human"]
+SERVER = "unity"
 ACTION_LIST = ["up", "down", "left", "right", "wait", "undo", "submit", "pinga", "pingb", "pingc", "pingd"]
 
 
@@ -11,12 +10,13 @@ def main():
     # Load agent
     agent = DiceAdventureAgent()
     # Set up environment
-    env = DiceAdventurePythonEnv(player=PLAYER, server=SERVER, train_mode=False)
-    obs = env.reset()[0]
+    env = DiceAdventurePythonEnv(server=SERVER)
+    state = env.reset()[0]
 
     while True:
-        action = agent.take_action(state=obs, actions=ACTION_LIST)
-        obs = env.step(action)
+        for p in PLAYERS:
+            action = agent.take_action(state=state, actions=ACTION_LIST)
+            state = env.execute_action(player=p, game_action=action)
         # env.render()
 
 
