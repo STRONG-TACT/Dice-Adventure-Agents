@@ -20,4 +20,4 @@ class DiceAdventureAgent:
         :param actions: (list) A list of string action names
         :return:        (string) An action from the 'actions' list
         """
-        raise choice(actions)
+        return choice(actions)
