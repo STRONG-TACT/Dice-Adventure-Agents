@@ -1,8 +1,8 @@
 from examples.random_agent.dice_adventure_python_env import DiceAdventurePythonEnv
 from examples.random_agent.agent import DiceAdventureAgent
 
-PLAYERS = ["dwarf", "giant", "human"]
-SERVER = "unity"
+PLAYERS = ["Dwarf", "Giant", "Human"]
+SERVER = "local"
 ACTION_LIST = ["up", "down", "left", "right", "wait", "undo", "submit", "pinga", "pingb", "pingc", "pingd"]
 
 
