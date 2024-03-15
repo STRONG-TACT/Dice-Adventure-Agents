@@ -281,12 +281,11 @@ class Board:
         return self.objects[player].x == self.objects[obj].x \
             and self.objects[player].y == self.objects[obj].y
 
-    def print_board(self, render_verbose=False, level=None, phase=None, num_rounds=None, round_cap=None):
+    def print_board(self, render_verbose=False, level=None, phase=None):
         if render_verbose:
             info = [
                 ["Level:", level],
                 ["Phase:", phase],
-                ["Number of Rounds Left:", round_cap - num_rounds],
                 ["Subgoal Count:", self.objects["**"].subgoal_count]
             ]
             print("Game Info:")
