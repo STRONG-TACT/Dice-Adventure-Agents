@@ -1,7 +1,6 @@
 # Dice Adventure Human-Machine Teaming Challenge
 Welcome! This repository contains skeleton code to develop and train agents to play Dice Adventure (DA), developed 
-at Carnegie Mellon University and Georgia Institute of Technology. The README serves as documentation for DA, how to
-use the code in this repository, and information on the challenge itself.
+at Carnegie Mellon University and Georgia Institute of Technology. This README describes how to use the code.
 
 - [Dice Adventure Documentation](#dice-adventure-documentation)
 - [Challenge Documentation](#challenge-documentation)
@@ -16,19 +15,9 @@ use the code in this repository, and information on the challenge itself.
 Dice Adventure is a 3D, turn-based, dungeon crawler game created at Carnegie Mellon University by [Dr. Erik Harpstead's](http://www.erikharpstead.net/) 
 game design team in support of an Army Research Lab project on human-machine teaming (HMT). [Dr. Christopher MacLellan's](https://chrismaclellan.com/) 
 Teachable AI Lab (TAIL) at the Georgia Institute of Technology supports the artificial intelligence development aspect 
-of the project. DA was designed to explore paradigms in HMT related to the Army mission (*maybe link to HMT paradigms? Is that open info or FOUO?*). As such, DA's design integrates
-concepts such as denied communication environments, *thing2*, and *thing3* (~update~).  
+of the project. DA was designed to explore paradigms in HMT. 
 
-You can find a complete game documentation [here](https://www.com). (~update~)
-
-## Challenge Documentation
-In order to conduct research into some of the human-machine teaming [website](https://strong-tact.github.io/)
-
-(*Insert link to challenge rules?*)
-
-### Agent Submission
-(Need to add general submission details)
-To learn which code files you should submit, please see [here](#code-submission).
+You can find a complete game documentation [here](https://tact-6yp4691.slack.com/files/U059F44L7EY/F06MDFR5Y3W/master_rulebook_-_dice_adventure_?origin_team=T01A81F52CE&origin_channel=C06PP2PSXUG).
 
 ## How to use code
 Although Dice Adventure (DA) was implemented in Unity and your agents will ultimately interface with the Unity version, 
@@ -48,12 +37,14 @@ project. If you encounter errors installing any of these versions, please [reach
 ### Run the sample code
 In the `examples/random_agent/` folder, there is a sample agent that plays as all three characters in the game and simply 
 takes random actions. By default, it uses the Unity server to play (for which you will need the Unity version of the game
-running), but you can change this at the top of the `play_game.py` file. 
+running), but you can change this at the top of the `play_game.py` file. If you use the local server, you'll need to add 
+`env.render()` in the while loop to see the 2D grid environment.
 
 ```sh
   python play_game.py
 ```
 
+The sample code is commented and can be used as a reference structure for training/testing agents.
 ### Develop your agents
 We provide template code in the `agent_template/` folder. You should implement your agents within the `DiceAdventureAgent`
 class provided in the `agent.py` file. This allows us to maintain a common API interface for all submitted agents.
@@ -64,20 +55,22 @@ the return should be an option from the list of game actions, so if, for instanc
 numbers, the conversion to a string should happen before the action is returned.
 
 A custom Gymnasium environment ([good reference](https://blog.paperspace.com/creating-custom-environments-openai-gym/)) 
-has been provided for convenience. This environment interfaces with both the local and Unity versions of the game via 
+has been provided for convenience in the file `dice_adventure_pathon_env.py`. This environment interfaces with both the local and Unity versions of the game via 
 the `server` class declaration parameter and can be used to avoid setting up your own connection to both versions of the game.
 No matter the type of agent you develop, you can add additional functions to the environment as needed to support training.
 Each function is documented in the file.
 
 ### Code Submission
-Agents should be submitted at [this link]() (~update~) before the deadline. In your submission, please include a zip file 
-of your `agent.py` file containing your agent implemented in the `DiceAdventureAgent` class, the `dice_adventure_python_env.py`
-file, a `requirements.txt` file containing any packages your model needs to run, and any other model files needed to 
-load in your agent.
+Agents should be submitted on the [submission portal](https://strong-tact.github.io) before the deadline. 
+In your submission, please include a zipped folder containing:
+  - your `agent.py` file containing your agent implemented in the `DiceAdventureAgent` class
+  - your `dice_adventure_python_env.py` file
+  - a `requirements.txt` file containing any packages your model needs to run
+  - any other model files needed to load in your agent
 
 ### Contact Information
 
-| Name | Position | Contact | 
-|------|----------|--------|
-| 1    | 2        |3|
-| 4    | 5        |6|
+| Name       | Position    | Contact              | 
+|------------|-------------|----------------------|
+| Glen Smith | PhD Student | glensmith(at)gatech.edu |
+
