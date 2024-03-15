@@ -16,7 +16,7 @@ game design team in support of an Army Research Lab project on human-machine tea
 Teachable AI Lab (TAIL) at the Georgia Institute of Technology supports the artificial intelligence development aspect 
 of the project. DA was designed to explore paradigms in HMT. 
 
-You can find a complete game documentation [here](https://tact-6yp4691.slack.com/files/U059F44L7EY/F06MDFR5Y3W/master_rulebook_-_dice_adventure_?origin_team=T01A81F52CE&origin_channel=C06PP2PSXUG).
+You can find a complete game documentation [here](https://docs.google.com/document/d/1YOSnrPz8EcrrrVsWRTMAMLsKLK9t8jRiTQkXvx9TB5E).
 
 ## How to use code
 Although Dice Adventure (DA) was implemented in Unity and your agents will ultimately interface with the Unity version, 
