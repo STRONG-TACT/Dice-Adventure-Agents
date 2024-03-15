@@ -3,7 +3,6 @@ Welcome! This repository contains skeleton code to develop and train agents to p
 at Carnegie Mellon University and Georgia Institute of Technology. This README describes how to use the code.
 
 - [Dice Adventure Documentation](#dice-adventure-documentation)
-- [Challenge Documentation](#challenge-documentation)
 - [How to use code](#how-to-use-code)
   - [Install required packages](#install-required-packages)
   - [Run the sample code](#run-the-sample-code)
