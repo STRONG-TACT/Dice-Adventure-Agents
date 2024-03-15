@@ -13,7 +13,7 @@ class DiceAdventure:
                  model_number=1,
                  num_repeats=0,
                  render=False,
-                 render_verbose=False,
+                 render_verbose=True,
                  restart_on_finish=False,
                  round_cap=0,
                  track_metrics=False):
@@ -657,9 +657,7 @@ class DiceAdventure:
         """
         self.board.print_board(self.render_verbose,
                                self.curr_level_num,
-                               self.phases[self.phase_num],
-                               self.num_rounds,
-                               self.round_cap)
+                               self.phases[self.phase_num])
 
     ###########
     # METRICS #

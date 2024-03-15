@@ -16,7 +16,7 @@ game design team in support of an Army Research Lab project on human-machine tea
 Teachable AI Lab (TAIL) at the Georgia Institute of Technology supports the artificial intelligence development aspect 
 of the project. DA was designed to explore paradigms in HMT. 
 
-You can find a complete game documentation [here](https://docs.google.com/document/d/1YOSnrPz8EcrrrVsWRTMAMLsKLK9t8jRiTQkXvx9TB5E).
+You can find a complete game documentation on the [competition portal](https://strong-tact.github.io/).
 
 ## How to use code
 Although Dice Adventure (DA) was implemented in Unity and your agents will ultimately interface with the Unity version, 
@@ -60,7 +60,7 @@ No matter the type of agent you develop, you can add additional functions to the
 Each function is documented in the file.
 
 ### Code Submission
-Agents should be submitted on the [submission portal](https://strong-tact.github.io) before the deadline. 
+Agents should be submitted on the [competition portal](https://strong-tact.github.io) before the deadline. 
 In your submission, please include a zipped folder containing:
   - your `agent.py` file containing your agent implemented in the `DiceAdventureAgent` class
   - your `dice_adventure_python_env.py` file
