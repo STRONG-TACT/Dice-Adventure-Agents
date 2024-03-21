@@ -54,7 +54,7 @@ the return should be an option from the list of game actions, so if, for instanc
 numbers, the conversion to a string should happen before the action is returned.
 
 A custom Gymnasium environment ([good reference](https://blog.paperspace.com/creating-custom-environments-openai-gym/)) 
-has been provided for convenience in the file `dice_adventure_pathon_env.py`. This environment interfaces with both the local and Unity versions of the game via 
+has been provided for convenience in the file `dice_adventure_python_env.py`. This environment interfaces with both the local and Unity versions of the game via 
 the `server` class declaration parameter and can be used to avoid setting up your own connection to both versions of the game.
 No matter the type of agent you develop, you can add additional functions to the environment as needed to support training.
 Each function is documented in the file.
