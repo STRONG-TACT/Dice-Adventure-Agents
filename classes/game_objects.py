@@ -2,24 +2,25 @@ from random import choice
 
 
 class GameObject:
-    def __init__(self, obj_code, index, x, y, type_):
+    def __init__(self, obj_code, index, index_num, x, y, type_):
         self.obj_code = obj_code
         self.index = index
+        self.index_num = index_num
         self.type = type_
         self.x = x
         self.y = y
 
 
 class Goal(GameObject):
-    def __init__(self, obj_code, index, name, type_, x, y):
-        super().__init__(obj_code, index, x, y, type_)
+    def __init__(self, obj_code, index, index_num, name, type_, x, y):
+        super().__init__(obj_code, index, index_num, x, y, type_)
         self.name = name
         self.reached = False
 
 
 class Shrine(Goal):
-    def __init__(self, obj_code, index, name, type_, x, y, player_code):
-        super().__init__(obj_code, index, name, type_, x, y)
+    def __init__(self, obj_code, index, index_num, name, type_, x, y, player_code):
+        super().__init__(obj_code, index, index_num, name, type_, x, y)
         self.player = self.get_player(player_code)
 
     @staticmethod
@@ -29,14 +30,14 @@ class Shrine(Goal):
 
 
 class Tower(Goal):
-    def __init__(self, obj_code, index, name, type_, x, y):
-        super().__init__(obj_code, index, name, type_, x, y)
+    def __init__(self, obj_code, index, index_num, name, type_, x, y):
+        super().__init__(obj_code, index, index_num, name, type_, x, y)
         self.subgoal_count = 0
 
 
 class Enemy(GameObject):
-    def __init__(self, obj_code, index, name, type_, x, y, dice_rolls, action_points=None):
-        super().__init__(obj_code, index, x, y, type_)
+    def __init__(self, obj_code, index, index_num, name, type_, x, y, dice_rolls, action_points=None):
+        super().__init__(obj_code, index, index_num, x, y, type_)
         self.name = name
         self.dice_rolls = dice_rolls
         self.action_points = action_points
@@ -52,8 +53,8 @@ class Enemy(GameObject):
 
 
 class Player(GameObject):
-    def __init__(self, obj_code, index, name, x, y, action_points, health, sight_range, dice_rolls):
-        super().__init__(obj_code, index, x, y, type_=name)
+    def __init__(self, obj_code, index, index_num, name, x, y, action_points, health, sight_range, dice_rolls):
+        super().__init__(obj_code, index, index_num, x, y, type_=name)
         # Indexing
         self.name = name
         # Stats
@@ -68,6 +69,9 @@ class Player(GameObject):
         self.start_y = y
         self.prev_x = x
         self.prev_y = y
+        self.seen_locations = set()
+        # Update now
+        self.update_seen_locations()
         # Status
         self.dead = False
         self.respawn_counter = None
@@ -113,10 +117,25 @@ class Player(GameObject):
         self.action_plan_step = None
         self.action_plan_finalized = False
 
+    def get_mask_radius(self):
+        locations = []
+        x_bound_upper = self.x + self.sight_range
+        x_bound_lower = self.x - self.sight_range
+        y_bound_upper = self.y + self.sight_range
+        y_bound_lower = self.y - self.sight_range
+
+        for j in range(y_bound_lower, y_bound_upper + 1):
+            for i in range(x_bound_lower, x_bound_upper + 1):
+                locations.append((j, i))
+        return locations
+
+    def update_seen_locations(self):
+        self.seen_locations.update(self.get_mask_radius())
+
 
 class Pin(GameObject):
-    def __init__(self, obj_code, index, x, y, placed_by, type_):
-        super().__init__(obj_code, index, x, y, type_)
+    def __init__(self, obj_code, index, index_num, x, y, placed_by, type_):
+        super().__init__(obj_code, index, index_num, x, y, type_)
         self.name = obj_code
         self.placed_by = placed_by
 

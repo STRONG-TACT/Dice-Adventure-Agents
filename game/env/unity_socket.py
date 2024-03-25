@@ -11,8 +11,15 @@ def execute_action(url, action):
     return send(url, str(action_command))
 
 
-def get_state(url):
-    state = send(url, '{"command":"get_state"}')
+def get_state(url, version):
+    if version == "character":
+        command = "get_state"
+    elif version == "fog":
+        command = "get_fog_state"
+    else:
+        command = "get_full_state"
+
+    state = send(url, f'{"command":"{command}"}')
     return loads(state)
 
 

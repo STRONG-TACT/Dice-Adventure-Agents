@@ -35,9 +35,9 @@ class DiceAdventurePythonEnv(Env):
         # STATE SETTINGS #
         ##################
         self.state_version = state_version
-        self.mask_radii = {"Dwarf": self.config["GAMEPLAY"]["OBJECT_INFO"]["OBJECT_CODES"]["1S"]["SIGHT_RANGE"],
-                           "Giant": self.config["GAMEPLAY"]["OBJECT_INFO"]["OBJECT_CODES"]["2S"]["SIGHT_RANGE"],
-                           "Human": self.config["GAMEPLAY"]["OBJECT_INFO"]["OBJECT_CODES"]["3S"]["SIGHT_RANGE"]}
+        self.mask_radii = {"Dwarf": self.config["OBJECT_INFO"]["OBJECT_CODES"]["1S"]["SIGHT_RANGE"],
+                           "Giant": self.config["OBJECT_INFO"]["OBJECT_CODES"]["2S"]["SIGHT_RANGE"],
+                           "Human": self.config["OBJECT_INFO"]["OBJECT_CODES"]["3S"]["SIGHT_RANGE"]}
 
         ##################
         # TRAIN SETTINGS #
@@ -130,23 +130,6 @@ class DiceAdventurePythonEnv(Env):
             state = unity_socket.get_state(url, version)
 
         return state
-
-    def _get_state_character(self, state, player):
-        obj = self._locate_object_by_name(state["content"]["scene"], player)
-        sight_range = self.mask_radii[player]
-        px, py = obj["x"], obj["y"]
-        # Get upper and lower bounds for x,y coordinates
-        x_bound_upper = px + sight_range
-        x_bound_lower = px - sight_range
-        y_bound_upper = py + sight_range
-        y_bound_lower = py - sight_range
-
-        filtered = []
-        for obj in state["content"]["scene"]:
-            if x_bound_lower <= obj["x"] <= x_bound_upper and \
-                    y_bound_lower <= obj["y"] <= y_bound_upper:
-                if obj["type"] == "character":
-                    pass
 
     @staticmethod
     def _get_reward():

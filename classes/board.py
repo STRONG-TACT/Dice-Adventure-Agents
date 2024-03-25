@@ -57,6 +57,7 @@ class Board:
         if re.match("\\dS", obj_code):
             obj = Player(obj_code=obj_code,
                          index=index,
+                         index_num=self.obj_counts[obj_code],
                          name=self.config["OBJECT_INFO"]["OBJECT_CODES"][obj_code]["NAME"],
                          x=x_pos,
                          y=y_pos,
@@ -68,6 +69,7 @@ class Board:
         elif re.match("(M\\d|S\\d|T\\d)", obj_code):
             obj = Enemy(obj_code=obj_code,
                         index=index,
+                        index_num=self.obj_counts[obj_code],
                         name=self.config["OBJECT_INFO"]["OBJECT_CODES"][obj_code]["NAME"],
                         type_=self.config["OBJECT_INFO"]["OBJECT_CODES"][obj_code]["TYPE"],
                         x=x_pos,
@@ -84,6 +86,7 @@ class Board:
             elif obj_code == "**":
                 obj = Tower(obj_code=obj_code,
                             index=index,
+                            index_num=self.obj_counts[obj_code],
                             name=self.config["OBJECT_INFO"]["OBJECT_CODES"][obj_code]["NAME"],
                             type_=self.config["OBJECT_INFO"]["OBJECT_CODES"][obj_code]["TYPE"],
                             x=x_pos,
@@ -92,6 +95,7 @@ class Board:
             elif re.match("\\dG", obj_code):
                 obj = Shrine(obj_code=obj_code,
                              index=index,
+                             index_num=self.obj_counts[obj_code],
                              name=self.config["OBJECT_INFO"]["OBJECT_CODES"][obj_code]["NAME"],
                              type_=self.config["OBJECT_INFO"]["OBJECT_CODES"][obj_code]["TYPE"],
                              x=x_pos,
@@ -101,6 +105,7 @@ class Board:
             else:
                 obj = Pin(obj_code=obj_code,
                           index=index,
+                          index_num=self.obj_counts[obj_code],
                           x=x_pos,
                           y=y_pos,
                           placed_by=placed_by,
@@ -140,8 +145,8 @@ class Board:
         """
         Updates character location based on given directional action. Note that when a 2D array is printed,
         moving "up" is equivalent to going down one index in the list of rows and vice versa for
-        moving "down". Therefore, "up" decreases the x coordinate by 1 and "down" increases the
-        x coordinate by 1.
+        moving "down". Therefore, "up" decreases the x coordinate by 1.txt and "down" increases the
+        x coordinate by 1.txt.
         :param action:
         :param x:
         :param y:
@@ -217,10 +222,6 @@ class Board:
         (usually for identification purposes)
         :return:
         """
-        # If 'index' parameter is provided, specifies that obj should be placed on board with value of
-        # 'index' in parentheses (usually for identification purposes)
-        # if index:
-        #     obj = f"{obj}({index})"
         if create:
             new_obj = self.create_object(x, y, obj_index, placed_by=placed_by)
             self.board[(y,x)][obj_index] = new_obj
@@ -234,6 +235,9 @@ class Board:
             # Remove obj from old position if it was previously on the grid
             if old_x is not None:
                 self.remove(obj_index, old_x, old_y, delete=delete)
+        # Track grid locations players have been to in order to apply fog of war masking
+        if isinstance(self.objects[obj_index], Player):
+            self.objects[obj_index].update_seen_locations()
 
     def remove(self, obj_index, x=None, y=None, delete=True):
         """
@@ -312,3 +316,9 @@ class Board:
             table.append(row)
         print("Grid:")
         print(tabulate(reversed(table), tablefmt="grid"), end="\n\n")
+
+    ###########
+    # HELPERS #
+    ###########
+
+

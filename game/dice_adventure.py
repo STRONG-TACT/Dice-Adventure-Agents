@@ -1,5 +1,6 @@
 from copy import deepcopy
 from json import loads
+from os import listdir
 from classes.board import Board
 from classes.game_objects import *
 from classes.metrics_tracker import GameMetricsTracker
@@ -29,8 +30,9 @@ class DiceAdventure:
         ##############
         # Level Setup
         self.levels = {}
+        self.levels_directory = "game/levels/"
         self.limit_levels = limit_levels if limit_levels \
-            else [int(i) for i in list(self.config["GAMEPLAY"]["LEVELS"].keys())]
+            else [i for i in range(len(listdir(self.levels_directory)))]
         self.get_levels()
         # Level Control
         self.curr_level_num = level if level in self.limit_levels else self.limit_levels[0]
@@ -101,10 +103,12 @@ class DiceAdventure:
     # LEVEL CONTROL #
     #################
     def get_levels(self):
-        levels = deepcopy(self.config["GAMEPLAY"]["LEVELS"])
+        levels = {int(filename.rstrip(".txt")): open(self.levels_directory + filename, "r").read()
+                  for filename in listdir(self.levels_directory)}
+
         # This makes sure positions are indexed with origin at "bottom left"
         self.levels = {
-            int(k): [[row[i:i + 2] for i in range(0, len(row), 2)] for row in reversed(v.strip().split("\n"))]
+            k: [[row[i:i + 2] for i in range(0, len(row), 2)] for row in reversed(v.strip().split("\n"))]
             for k, v in levels.items()
             if int(k) in self.limit_levels
         }
@@ -169,12 +173,11 @@ class DiceAdventure:
     # GET STATE & SEND ACTION #
     ###########################
 
-    def get_state(self):
+    def get_state(self, player, version=None):
         """
         Constructs a state representation of the game.
         :return: Dict
         """
-        # self.num_calls += 1
         state = {
             "command": "get_state",
             "status": "OK" if not self.terminated else "Done",
@@ -184,36 +187,60 @@ class DiceAdventure:
                     "boardWidth": len(self.curr_level[0]),
                     "boardHeight": len(self.curr_level),
                     "level": self.curr_level_num,
-                    "num_repeats": self.num_repeats - self.lvl_repeats[self.curr_level_num],
                     "currentPhase": self.phases[self.phase_num],
                 },
                 "scene": []
             }
         }
+        player_obj = self.board.objects[self.player_code_mapping[player]]
+        # Defines the set of grid locations currently visible to the player
+        if version == "character":
+            visible_locations = player_obj.get_mask_radius()
+        elif version == "fow":
+            visible_locations = player_obj.seen_locations
+        else:
+            visible_locations = None
+
+        # Walls are not tracked as objects, need to count them here to make sure IDs are unique
+        wall_count = 1
         for pos, obj_dict in self.board.board.items():
+            if version in ["character", "fow"] and pos not in visible_locations:
+                continue
             # Walls
             if obj_dict is None:
-                state["content"]["scene"].append({"name": "Wall", "type": "wall", "x": int(pos[1]), "y": int(pos[0])})
+                state["content"]["scene"].append({"id": f"##-{wall_count}",
+                                                       "objectCode": "##",
+                                                       "entityType": "wall",
+                                                       "x": int(pos[1]),
+                                                       "y": int(pos[0])})
+                wall_count += 1
             else:
                 for o in obj_dict:
                     obj = obj_dict[o]
 
-                    ele = {"name": obj.name, "type": obj.type, "x": obj.x, "y": obj.y}
+                    ele = {"id": f"{obj.obj_code}-{obj.index_num}",
+                           "objectCode": obj.obj_code,
+                           "entityType": obj.type,
+                           "x": obj.x,
+                           "y": obj.y}
                     if isinstance(obj, Player):
                         ele.update({
                             "characterId": int(obj.obj_code[0]),
-                            "pinCursorX": obj.pin_x,
-                            "pinCursorY": obj.pin_y,
-                            "sightRange": obj.sight_range,
-                            "monsterDice": f"D{obj.dice_rolls['MONSTER']['VAL']}+{obj.dice_rolls['MONSTER']['CONST']}",
-                            "trapDice": f"D{obj.dice_rolls['TRAP']['VAL']}+{obj.dice_rolls['TRAP']['CONST']}",
-                            "stoneDice": f"D{obj.dice_rolls['STONE']['VAL']}+{obj.dice_rolls['STONE']['CONST']}",
                             "health": obj.health,
-                            "dead": obj.dead,
-                            "actionPoints": obj.action_points,
-                            "actionPlan": obj.action_plan,
-                            "action_plan_finalized": obj.action_plan_finalized
+                            "dead": obj.dead
                         })
+                        # Only provide extra this information if state being provided is for given character
+                        if obj.obj_code == player_obj.obj_code:
+                            ele.update({
+                                "pinCursorX": obj.pin_x,
+                                "pinCursorY": obj.pin_y,
+                                "sightRange": obj.sight_range,
+                                "monsterDice": f"D{obj.dice_rolls['MONSTER']['VAL']}+{obj.dice_rolls['MONSTER']['CONST']}",
+                                "trapDice": f"D{obj.dice_rolls['TRAP']['VAL']}+{obj.dice_rolls['TRAP']['CONST']}",
+                                "stoneDice": f"D{obj.dice_rolls['STONE']['VAL']}+{obj.dice_rolls['STONE']['CONST']}",
+                                "actionPoints": obj.action_points,
+                                "actionPlan": obj.action_plan
+                            })
                     # Goals
                     elif isinstance(obj, Shrine):
                         ele.update({
@@ -227,7 +254,7 @@ class DiceAdventure:
                     # Enemies
                     elif isinstance(obj, Enemy):
                         ele.update({
-                            "name": obj.index,
+                            "id": f"{obj.obj_code}-{obj.index_num}",
                             "combatDice": f"D{obj.dice_rolls['VAL']}+{obj.dice_rolls['CONST']}"
                         })
                         # Action points only apply to monsters
@@ -236,11 +263,14 @@ class DiceAdventure:
                     # Pins
                     elif isinstance(obj, Pin):
                         ele.update({
-                            "name": obj.name,
+                            "id": f"{obj.obj_code}-{obj.index_num}",
                             "placedBy": obj.placed_by
                         })
                     state["content"]["scene"].append(ele)
+
         return state
+
+        # return state.get_state(game_state, self.config, self.board, player_obj, version)
 
     def execute_action(self, player, action):
         """
@@ -250,7 +280,7 @@ class DiceAdventure:
         :return: N/A
         """
         player_code = self.player_code_mapping[player]
-        # self.num_calls += 1
+        # self.num_calls += 1.txt
         if self.track_metrics:
             # Track agent action
             self.tracker.update(target="game", metric_name="agent_action", player=player, agent_action=action,
@@ -505,7 +535,7 @@ class DiceAdventure:
         # print("EXECUTING ENEMY MOVEMENT")
         monsters = [i for i in self.board.objects.values() if isinstance(i, Enemy) and i.name == "Monster"]
         if monsters:
-            # for i in range(1, max_moves + 1):
+            # for i in range(1.txt, max_moves + 1.txt):
             move_count = 0
             done = False
             while not done:

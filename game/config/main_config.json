@@ -6,13 +6,6 @@
 	  "VALID_PIN_TYPES": ["pinga", "pingb", "pingc", "pingd"],
 	  "VALID_MOVE_ACTIONS": ["left", "right", "up", "down", "wait", "submit"]
 	},
-	"LEVELS": {
-	  "1": "##**##\n1G2G3G\n1S2S3S\nM1M2M1",
-	  "2": "##**##\n##..##\n##M2##\n1G2G3G\nM1M1M1\n1S2S3S",
-	  "3": "##2G##\n..**..\n3GS11G\n##T1##\n3S2S1S",
-	  "4": "##..##..##..##\n##2G..T1M2..**\n....####..1G##\n##M1..S13G..##\n##3S##..##M2##\n##1S2SM2##..##",
-	  "5": "####............####\n##..####1G..S1M1....\n##....T1##M1....S1..\n##..M3..####..M1####\n....##**T1..........\nT1..2G##..M1S1##....\n..##T1##M2....####..\nM1..##S1..T1##..3G##\n3S......####M3T1....\n1S2S....M2.........."
-	},
 	"METRICS": {
 	  "DIRECTORIES": {
 		"LOGFILES": "train/{}/metrics/gameplay/",
@@ -35,9 +28,9 @@
 	"PHASES": {
 	  "PINNING_PHASE_NAME": "Player_Pinning",
 	  "PLANNING_PHASE_NAME": "Player_Planning",
-	  "PLAYER_EXECUTION_PHASE_NAME": "Player_Execution",
-	  "ENEMY_EXECUTION_PHASE_NAME": "Enemy_Execution",
-	  "PHASE_LIST": ["Player_Pinning", "Player_Planning", "Player_Execution", "Enemy_Execution"]
+	  "PLAYER_EXECUTION_PHASE_NAME": "Player_Moving",
+	  "ENEMY_EXECUTION_PHASE_NAME": "Monster_Moving",
+	  "PHASE_LIST": ["Player_Pinning", "Player_Planning", "Player_Moving", "Monster_Moving"]
   	}
   },
   "OBJECT_INFO": {
@@ -85,17 +78,17 @@
 	  "1G": {"NAME": "Shrine", "TYPE": "shrine"},
 	  "2G": {"NAME": "Shrine", "TYPE": "shrine"},
 	  "3G": {"NAME": "Shrine", "TYPE": "shrine"},
-	  "M1": {"NAME": "Monster","TYPE": "S_Monster", "DICE_ROLLS":  {"VAL": 4, "CONST": 0}, "ACTION_POINTS": 2},
-	  "M2": {"NAME": "Monster", "TYPE": "M_Monster", "DICE_ROLLS":  {"VAL": 6, "CONST": 0}, "ACTION_POINTS": 2},
-	  "M3": {"NAME": "Monster", "TYPE": "L_Monster", "DICE_ROLLS":  {"VAL": 8, "CONST": 0}, "ACTION_POINTS": 2},
-	  "M4": {"NAME": "Monster", "TYPE": "XL_Monster", "DICE_ROLLS": {"VAL": 10, "CONST": 0}, "ACTION_POINTS": 2},
-	  "T1": {"NAME": "Trap", "TYPE": "S_Trap", "DICE_ROLLS":  {"VAL": 4, "CONST": 2}},
-	  "T2": {"NAME": "Trap", "TYPE": "M_Trap", "DICE_ROLLS":  {"VAL": 4, "CONST": 2}},
-	  "T3": {"NAME": "Trap", "TYPE": "L_Trap", "DICE_ROLLS":  {"VAL": 4, "CONST": 2}},
-	  "S1": {"NAME": "Stone", "TYPE": "S_Stone", "DICE_ROLLS":  {"VAL": 0, "CONST": 5}},
-	  "S2": {"NAME": "Stone", "TYPE": "M_Stone", "DICE_ROLLS":  {"VAL": 0, "CONST": 5}},
-	  "S3": {"NAME": "Stone", "TYPE": "L_Stone", "DICE_ROLLS":  {"VAL": 0, "CONST": 5}},
-	  "..": {"NAME": "Empty_Space", "TYPE": "Empty_Space"},
+	  "M1": {"NAME": "Monster","TYPE": "monster", "DICE_ROLLS":  {"VAL": 4, "CONST": 0}, "ACTION_POINTS": 2},
+	  "M2": {"NAME": "Monster", "TYPE": "monster", "DICE_ROLLS":  {"VAL": 6, "CONST": 0}, "ACTION_POINTS": 2},
+	  "M3": {"NAME": "Monster", "TYPE": "monster", "DICE_ROLLS":  {"VAL": 8, "CONST": 0}, "ACTION_POINTS": 2},
+	  "M4": {"NAME": "Monster", "TYPE": "monster", "DICE_ROLLS": {"VAL": 10, "CONST": 0}, "ACTION_POINTS": 2},
+	  "T1": {"NAME": "Trap", "TYPE": "trap", "DICE_ROLLS":  {"VAL": 4, "CONST": 2}},
+	  "T2": {"NAME": "Trap", "TYPE": "trap", "DICE_ROLLS":  {"VAL": 4, "CONST": 2}},
+	  "T3": {"NAME": "Trap", "TYPE": "trap", "DICE_ROLLS":  {"VAL": 4, "CONST": 2}},
+	  "S1": {"NAME": "Stone", "TYPE": "stone", "DICE_ROLLS":  {"VAL": 0, "CONST": 5}},
+	  "S2": {"NAME": "Stone", "TYPE": "stone", "DICE_ROLLS":  {"VAL": 0, "CONST": 5}},
+	  "S3": {"NAME": "Stone", "TYPE": "stone", "DICE_ROLLS":  {"VAL": 0, "CONST": 5}},
+	  "..": {"NAME": "Empty_Space", "TYPE": "empty_space"},
 	  "**": {"NAME": "Tower", "TYPE": "goal"},
 	  "##": {"NAME": "Wall", "TYPE": "wall"},
 	  "PA": {"NAME": "PA", "TYPE": "pin"},
