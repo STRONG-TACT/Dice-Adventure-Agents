@@ -1,13 +1,13 @@
 # Dice Adventure Human-Machine Teaming Challenge
 Welcome! This repository contains skeleton code to develop and train agents to play Dice Adventure (DA), developed 
-at Carnegie Mellon University and Georgia Institute of Technology. This README describes how to use the code.
+at Carnegie Mellon University and Georgia Institute of Technology. This README describes how to use the code. Please review the [changelog](https://github.com/STRONG-TACT/Dice-Adventure-Agents/blob/main/changelog.md) for any updates made to the code files.
 
 - [Dice Adventure Documentation](#dice-adventure-documentation)
 - [How to use code](#how-to-use-code)
   - [Install required packages](#install-required-packages)
   - [Run the sample code](#run-the-sample-code)
   - [Develop your agents](#develop-your-agents)
-  - [Agent Submission](#agent-submission)
+  - [Code Submission](#code-submission)
 
 
 ## Dice Adventure Documentation
