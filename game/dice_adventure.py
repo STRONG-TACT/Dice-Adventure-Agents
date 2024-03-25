@@ -194,8 +194,9 @@ class DiceAdventure:
         }
         player_obj = self.board.objects[self.player_code_mapping[player]]
         # Defines the set of grid locations currently visible to the player
-        if version == "character":
-            visible_locations = player_obj.get_mask_radius()
+        sight_range = player_obj.get_mask_radius()
+        if version == "player":
+            visible_locations = sight_range
         elif version == "fow":
             visible_locations = player_obj.seen_locations
         else:
@@ -204,15 +205,15 @@ class DiceAdventure:
         # Walls are not tracked as objects, need to count them here to make sure IDs are unique
         wall_count = 1
         for pos, obj_dict in self.board.board.items():
-            if version in ["character", "fow"] and pos not in visible_locations:
+            if version in ["player", "fow"] and pos not in visible_locations:
                 continue
             # Walls
             if obj_dict is None:
                 state["content"]["scene"].append({"id": f"##-{wall_count}",
-                                                       "objectCode": "##",
-                                                       "entityType": "wall",
-                                                       "x": int(pos[1]),
-                                                       "y": int(pos[0])})
+                                                  "objectCode": "##",
+                                                  "entityType": "wall",
+                                                  "x": int(pos[1]),
+                                                  "y": int(pos[0])})
                 wall_count += 1
             else:
                 for o in obj_dict:
@@ -223,24 +224,27 @@ class DiceAdventure:
                            "entityType": obj.type,
                            "x": obj.x,
                            "y": obj.y}
+
                     if isinstance(obj, Player):
-                        ele.update({
-                            "characterId": int(obj.obj_code[0]),
-                            "health": obj.health,
-                            "dead": obj.dead
-                        })
-                        # Only provide extra this information if state being provided is for given character
-                        if obj.obj_code == player_obj.obj_code:
+                        # Can return player data ONLY if in current sight range or if giving full state
+                        if version == "full" or pos in sight_range:
                             ele.update({
-                                "pinCursorX": obj.pin_x,
-                                "pinCursorY": obj.pin_y,
-                                "sightRange": obj.sight_range,
-                                "monsterDice": f"D{obj.dice_rolls['MONSTER']['VAL']}+{obj.dice_rolls['MONSTER']['CONST']}",
-                                "trapDice": f"D{obj.dice_rolls['TRAP']['VAL']}+{obj.dice_rolls['TRAP']['CONST']}",
-                                "stoneDice": f"D{obj.dice_rolls['STONE']['VAL']}+{obj.dice_rolls['STONE']['CONST']}",
-                                "actionPoints": obj.action_points,
-                                "actionPlan": obj.action_plan
+                                "characterId": int(obj.obj_code[0]),
+                                "health": obj.health,
+                                "dead": obj.dead
                             })
+                            # Only provide extra this information if state being provided is for given character
+                            if obj.obj_code == player_obj.obj_code:
+                                ele.update({
+                                    "pinCursorX": obj.pin_x,
+                                    "pinCursorY": obj.pin_y,
+                                    "sightRange": obj.sight_range,
+                                    "monsterDice": f"D{obj.dice_rolls['MONSTER']['VAL']}+{obj.dice_rolls['MONSTER']['CONST']}",
+                                    "trapDice": f"D{obj.dice_rolls['TRAP']['VAL']}+{obj.dice_rolls['TRAP']['CONST']}",
+                                    "stoneDice": f"D{obj.dice_rolls['STONE']['VAL']}+{obj.dice_rolls['STONE']['CONST']}",
+                                    "actionPoints": obj.action_points,
+                                    "actionPlan": obj.action_plan
+                                })
                     # Goals
                     elif isinstance(obj, Shrine):
                         ele.update({
@@ -253,13 +257,16 @@ class DiceAdventure:
                         })
                     # Enemies
                     elif isinstance(obj, Enemy):
-                        ele.update({
-                            "id": f"{obj.obj_code}-{obj.index_num}",
-                            "combatDice": f"D{obj.dice_rolls['VAL']}+{obj.dice_rolls['CONST']}"
-                        })
-                        # Action points only apply to monsters
-                        if obj.name == "Monster":
-                            ele["actionPoints"] = self.config["OBJECT_INFO"]["OBJECT_CODES"][obj.obj_code]["ACTION_POINTS"]
+                        # Monsters should ONLY be returned when in sight range of player, other enemy types can be
+                        # returned even if not in sight range but have been seen before when 'version' is 'fow'
+                        if version == "full" or obj.name != "Monster" or (obj.name == "Monster" and pos in sight_range):
+                            ele.update({
+                                "id": f"{obj.obj_code}-{obj.index_num}",
+                                "combatDice": f"D{obj.dice_rolls['VAL']}+{obj.dice_rolls['CONST']}"
+                            })
+                            # Action points only apply to monsters
+                            if obj.name == "Monster":
+                                ele["actionPoints"] = self.config["OBJECT_INFO"]["OBJECT_CODES"][obj.obj_code]["ACTION_POINTS"]
                     # Pins
                     elif isinstance(obj, Pin):
                         ele.update({
