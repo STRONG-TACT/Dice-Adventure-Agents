@@ -12,7 +12,7 @@ def execute_action(url, action):
 
 
 def get_state(url, version):
-    if version == "character":
+    if version == "player":
         command = "get_state"
     elif version == "fog":
         command = "get_fog_state"

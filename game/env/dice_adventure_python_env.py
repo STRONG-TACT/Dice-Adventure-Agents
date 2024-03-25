@@ -119,11 +119,36 @@ class DiceAdventurePythonEnv(Env):
             next_state = unity_socket.execute_action(url, game_action)
         return next_state
 
-    def get_state(self, player=None, version=None):
+    def get_state(self, player=None, version=None, server=None):
+        """
+        Gets the current state of the game.
+        :param player: (string) The player whose perspective will be used to collect the state. Can be one of
+                                {Dwarf, Giant, Human}.
+        :param version: (string) The level of visibility. Can be one of {full, player, fow}
+        :param server: (string) Determines whether to get state from Python version or unity version of game. Can be
+                                one of {local, unity}.
+        :return: (dict) The state of the game
+
+        The state is always given from the perspective of a player and defines how much of the level the
+        player can currently "see". The following state version options define how much information this function
+        returns.
+        - [full]:   Returns all objects and player stats. This ignores the 'player' parameter.
+
+        - [player]: Returns all objects in the current sight range of the player. Limited information is provided about
+                    other players present in the state.
+
+        - [fow]:    Stands for Fog of War. In the Unity version of the game, you can see a visibility mask for each
+                    character. Black positions have not been observed. Gray positions have been observed but are not
+                    currently in the player's view. This option returns all objects in the current sight range (view) of
+                    the player plus objects in positions that the player has seen before. Note that any object that can
+                    move (such as monsters and other players) are only returned when they are in the player's current
+                    view.
+        """
         version = version if version else self.state_version
         player = player if player else self.player
+        server = server if server else self.server
 
-        if self.server == "local":
+        if server == "local":
             state = self.game.get_state(player, version)
         else:
             url = self.unity_socket_url.format(player)
@@ -138,20 +163,3 @@ class DiceAdventurePythonEnv(Env):
         :return: (int) The reward
         """
         return 0
-
-    ###########
-    # HELPERS #
-    ###########
-    def _check_bounds(self, px, py, x, y):
-        pass
-
-    @staticmethod
-    def _locate_object_by_name(scene, obj_name):
-        obj = None
-        for i in scene:
-            if i["name"] == obj_name:
-                obj = i
-                break
-        return obj
-
-
