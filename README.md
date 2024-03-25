@@ -1,13 +1,13 @@
 # Dice Adventure Human-Machine Teaming Challenge
 Welcome! This repository contains skeleton code to develop and train agents to play Dice Adventure (DA), developed 
-at Carnegie Mellon University and Georgia Institute of Technology. This README describes how to use the code.
+at Carnegie Mellon University and Georgia Institute of Technology. This README describes how to use the code. Please review the [changelog](https://github.com/STRONG-TACT/Dice-Adventure-Agents/blob/main/changelog.md) for any updates made to the code files.
 
 - [Dice Adventure Documentation](#dice-adventure-documentation)
 - [How to use code](#how-to-use-code)
   - [Install required packages](#install-required-packages)
   - [Run the sample code](#run-the-sample-code)
   - [Develop your agents](#develop-your-agents)
-  - [Agent Submission](#agent-submission)
+  - [Code Submission](#code-submission)
 
 
 ## Dice Adventure Documentation
@@ -56,7 +56,7 @@ the return should be an option from the list of game actions, so if, for instanc
 numbers, the conversion to a string should happen before the action is returned.
 
 A custom Gymnasium environment ([good reference](https://blog.paperspace.com/creating-custom-environments-openai-gym/)) 
-has been provided for convenience in the file `dice_adventure_pathon_env.py`. This environment interfaces with both the local and Unity versions of the game via 
+has been provided for convenience in the file `dice_adventure_python_env.py`. This environment interfaces with both the local and Unity versions of the game via 
 the `server` class declaration parameter and can be used to avoid setting up your own connection to both versions of the game.
 No matter the type of agent you develop, you can add additional functions to the environment as needed to support training.
 Each function is documented in the file.
