@@ -1,4 +1,4 @@
-from examples.random_agent.dice_adventure_python_env import DiceAdventurePythonEnv
+from game.env.dice_adventure_python_env import DiceAdventurePythonEnv
 from examples.random_agent.agent import DiceAdventureAgent
 
 PLAYERS = ["Dwarf", "Giant", "Human"]
