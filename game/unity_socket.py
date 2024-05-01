@@ -19,7 +19,9 @@ def get_state(url, version):
     else:
         command = "get_full_state"
 
-    state = send(url, f'{"command":"{command}"}')
+    print(url)
+    print(f'{{"command":"{command}"}}')
+    state = send(url, f'{{"command":"{command}"}}')
     return loads(state)
 
 
