@@ -1,5 +1,7 @@
+from time import sleep
 from examples.random_agent.dice_adventure_python_env import DiceAdventurePythonEnv
 from examples.random_agent.agent import DiceAdventureAgent
+
 
 PLAYERS = ["Dwarf", "Giant", "Human"]
 SERVER = "local"
@@ -17,7 +19,8 @@ def main():
         for p in PLAYERS:
             action = agent.take_action(state=state, actions=ACTION_LIST)
             state = env.execute_action(player=p, game_action=action)
-        # env.render()
+        env.render()
+        sleep(.5)
 
 
 if __name__ == "__main__":

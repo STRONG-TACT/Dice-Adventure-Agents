@@ -35,9 +35,10 @@ class DiceAdventurePythonEnv(Env):
         # STATE SETTINGS #
         ##################
         self.state_version = state_version
-        self.mask_radii = {"Dwarf": self.config["GAMEPLAY"]["OBJECT_INFO"]["OBJECT_CODES"]["1S"]["SIGHT_RANGE"],
-                           "Giant": self.config["GAMEPLAY"]["OBJECT_INFO"]["OBJECT_CODES"]["2S"]["SIGHT_RANGE"],
-                           "Human": self.config["GAMEPLAY"]["OBJECT_INFO"]["OBJECT_CODES"]["3S"]["SIGHT_RANGE"]}
+
+        self.mask_radii = {"Dwarf": self.config["OBJECT_INFO"]["OBJECT_CODES"]["1S"]["SIGHT_RANGE"],
+                           "Giant": self.config["OBJECT_INFO"]["OBJECT_CODES"]["2S"]["SIGHT_RANGE"],
+                           "Human": self.config["OBJECT_INFO"]["OBJECT_CODES"]["3S"]["SIGHT_RANGE"]}
 
         ##################
         # TRAIN SETTINGS #
