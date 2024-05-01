@@ -1,5 +1,5 @@
 from game.dice_adventure import DiceAdventure
-import game.env.unity_socket as unity_socket
+import game.unity_socket as unity_socket
 from gymnasium import Env
 from json import loads
 
@@ -9,10 +9,11 @@ class DiceAdventurePythonEnv(Env):
     Implements a custom gyn environment for the Dice Adventure game.
     """
     def __init__(self,
-                 player=None,
+                 player="Dwarf",
                  id_=0,
                  train_mode=False,
                  server="local",
+                 state_version="character",
                  **kwargs):
         """
         Init function for Dice Adventure gym environment.
@@ -25,10 +26,18 @@ class DiceAdventurePythonEnv(Env):
         :param kwargs:      (dict) Additional keyword arguments to pass into Dice Adventure game. Only applies when
                                    'server' is 'local'.
         """
-        self.config = self.config = loads(open("game/config/main_config.json", "r").read())
+        self.config = loads(open("game/config/main_config.json", "r").read())
         self.player = player
         self.id = id_
         self.kwargs = kwargs
+
+        ##################
+        # STATE SETTINGS #
+        ##################
+        self.state_version = state_version
+        self.mask_radii = {"Dwarf": self.config["OBJECT_INFO"]["OBJECT_CODES"]["1S"]["SIGHT_RANGE"],
+                           "Giant": self.config["OBJECT_INFO"]["OBJECT_CODES"]["2S"]["SIGHT_RANGE"],
+                           "Human": self.config["OBJECT_INFO"]["OBJECT_CODES"]["3S"]["SIGHT_RANGE"]}
 
         ##################
         # TRAIN SETTINGS #
@@ -104,21 +113,47 @@ class DiceAdventurePythonEnv(Env):
         """
         if self.server == "local":
             self.game.execute_action(player, game_action)
+            next_state = self.get_state()
         else:
             url = self.unity_socket_url.format(player.lower())
-            unity_socket.execute_action(url, game_action)
-        return self.get_state()
+            next_state = unity_socket.execute_action(url, game_action)
+        return next_state
 
-    def get_state(self):
+    def get_state(self, player=None, version=None, server=None):
         """
         Gets the current state of the game.
-        :return: (dict) The game state
+        :param player: (string) The player whose perspective will be used to collect the state. Can be one of
+                                {Dwarf, Giant, Human}.
+        :param version: (string) The level of visibility. Can be one of {full, player, fow}
+        :param server: (string) Determines whether to get state from Python version or unity version of game. Can be
+                                one of {local, unity}.
+        :return: (dict) The state of the game
+
+        The state is always given from the perspective of a player and defines how much of the level the
+        player can currently "see". The following state version options define how much information this function
+        returns.
+        - [full]:   Returns all objects and player stats. This ignores the 'player' parameter.
+
+        - [player]: Returns all objects in the current sight range of the player. Limited information is provided about
+                    other players present in the state.
+
+        - [fow]:    Stands for Fog of War. In the Unity version of the game, you can see a visibility mask for each
+                    character. Black positions have not been observed. Gray positions have been observed but are not
+                    currently in the player's view. This option returns all objects in the current sight range (view) of
+                    the player plus objects in positions that the player has seen before. Note that any object that can
+                    move (such as monsters and other players) are only returned when they are in the player's current
+                    view.
         """
-        if self.server == "local":
-            state = self.game.get_state()
+        version = version if version else self.state_version
+        player = player if player else self.player
+        server = server if server else self.server
+
+        if server == "local":
+            state = self.game.get_state(player, version)
         else:
-            url = self.unity_socket_url.format("Dwarf")
-            state = unity_socket.get_state(url)
+            url = self.unity_socket_url.format(player)
+            state = unity_socket.get_state(url, version)
+
         return state
 
     @staticmethod
@@ -128,4 +163,3 @@ class DiceAdventurePythonEnv(Env):
         :return: (int) The reward
         """
         return 0
-
