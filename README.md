@@ -66,12 +66,15 @@ Agents should be submitted on the [competition portal](https://strong-tact.githu
 In your submission, please include a zipped folder containing:
   - your `agent.py` file containing your agent implemented in the `DiceAdventureAgent` class
   - your `dice_adventure_python_env.py` file
+  - the `submission_info.json` file containing your name and your agent's name
   - a `requirements.txt` file containing any packages your model needs to run
   - any other model files needed to load in your agent
 
 ### Contact Information
+Please contact any of us if you have any questions or run into any issues!
 
 | Name       | Position    | Contact              | 
 |------------|-------------|----------------------|
 | Glen Smith | PhD Student | glensmith(at)gatech.edu |
+| Qiao Zhang | PhD Student | zq99(at)gatech.edu |
 
