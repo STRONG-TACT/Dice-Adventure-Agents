@@ -24,7 +24,7 @@ this repository also implements a local, Python version of DA that users can use
 version as a way to train RL agents that required near clock-time feedback for millions of time steps. Please follow
 these steps to set up your environment to use both the local and Unity versions of the game.
 
-*Note: We tested this code in Python 3.9.0*
+*Note: We tested this code in Python 3.9.0. Please see the end of this README for full list of software versions.*
 
 ### Install required packages
 Install the required packages using the `requirements.txt` file in order for DA to run. You may add additional packages
@@ -77,4 +77,11 @@ Please contact any of us if you have any questions or run into any issues!
 |------------|-------------|----------------------|
 | Glen Smith | PhD Student | glensmith(at)gatech.edu |
 | Qiao Zhang | PhD Student | zq99(at)gatech.edu |
+
+### Versions
+| Tool/Software  | Version |
+|----------------|---------|
+| Python         | 3.9.0   |
+| Unity Hub      | 3.5.1   |
+| Unity Editor   | 2020.3.32f1 |
 
