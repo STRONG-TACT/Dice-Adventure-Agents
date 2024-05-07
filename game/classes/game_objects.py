@@ -53,7 +53,7 @@ class Enemy(GameObject):
 
 
 class Player(GameObject):
-    def __init__(self, obj_code, index, index_num, name, x, y, action_points, health, sight_range, dice_rolls):
+    def __init__(self, obj_code, index, index_num, name, x, y, action_points, health, lives, sight_range, dice_rolls):
         super().__init__(obj_code, index, index_num, x, y, type_=name)
         # Indexing
         self.name = name
@@ -62,6 +62,8 @@ class Player(GameObject):
         self.max_action_points = action_points
         self.health = health
         self.max_health = health
+        self.lives = lives
+        self.max_lives = lives
         self.sight_range = sight_range
         self.dice_rolls = dice_rolls
         # Location
@@ -74,6 +76,7 @@ class Player(GameObject):
         self.update_seen_locations()
         # Status
         self.dead = False
+        self.can_respawn = True
         self.respawn_counter = None
         self.death_round = None
         self.goal_reached = False
