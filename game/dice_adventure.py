@@ -1,9 +1,10 @@
 from copy import deepcopy
 from json import loads
 from os import listdir
-from classes.board import Board
-from classes.game_objects import *
-from classes.metrics_tracker import GameMetricsTracker
+from time import time
+from game.classes.board import Board
+from game.classes.game_objects import *
+from game.classes.metrics_tracker import GameMetricsTracker
 
 
 class DiceAdventure:
@@ -78,6 +79,9 @@ class DiceAdventure:
         self.directions = self.config["GAMEPLAY"]["ACTIONS"]["DIRECTIONS"]
         # Enemy Execution
         self.enemy_execution_phase_name = self.config["GAMEPLAY"]["PHASES"]["ENEMY_EXECUTION_PHASE_NAME"]
+        # Countdown timer
+        self.countdown_timer = time()
+        self.countdown_max_time = self.config["GAMEPLAY"]["COUNTDOWN_TIMER_SECONDS"]
         #############
         # RENDERING #
         #############
@@ -178,6 +182,8 @@ class DiceAdventure:
         Constructs a state representation of the game.
         :return: Dict
         """
+        self.check_countdown_timer()
+
         state = {
             "command": "get_state",
             "status": "OK" if not self.terminated else "Done",
@@ -188,6 +194,7 @@ class DiceAdventure:
                     "boardHeight": len(self.curr_level),
                     "level": self.curr_level_num,
                     "currentPhase": self.phases[self.phase_num],
+                    "timer": round(self.countdown_max_time - (time() - self.countdown_timer), 2)
                 },
                 "scene": []
             }
@@ -231,6 +238,7 @@ class DiceAdventure:
                             ele.update({
                                 "characterId": int(obj.obj_code[0]),
                                 "health": obj.health,
+                                "lives": obj.lives,
                                 "dead": obj.dead
                             })
                             # Only provide extra this information if state being provided is for given character
@@ -286,6 +294,10 @@ class DiceAdventure:
         :param action: The action to apply
         :return: N/A
         """
+        if self.check_countdown_timer():
+            # No-op because phase timer ran out
+            return
+
         player_code = self.player_code_mapping[player]
         # self.num_calls += 1.txt
         if self.track_metrics:
@@ -323,7 +335,8 @@ class DiceAdventure:
         else:
             for p in dead:
                 # Check if they've waited enough game cycles
-                if self.num_rounds - self.board.objects[p].death_round >= self.respawn_wait:
+                if self.board.objects[p].can_respawn and (self.num_rounds - self.board.objects[p].death_round
+                                                          >= self.respawn_wait):
                     # Player has waited long enough
                     self.board.objects[p].dead = False
                     self.board.objects[p].death_round = None
@@ -331,6 +344,22 @@ class DiceAdventure:
                     self.board.objects[p].prev_x = self.board.objects[p].start_x
                     self.board.objects[p].prev_y = self.board.objects[p].start_y
                     self.board.place(p, x=self.board.objects[p].start_x, y=self.board.objects[p].start_y)
+
+    def check_countdown_timer(self):
+        """
+        Checks if the max time for current round has passed. If so, auto-submits for all players and moves on to next
+        phase.
+        :return: N/A
+        """
+        if time() - self.countdown_timer >= self.countdown_max_time:
+            for p in self.player_code_mapping.values():
+                if self.phases[self.phase_num] == self.pinning_phase_name:
+                    self.board.objects[p].pin_finalized = True
+                elif self.phases[self.phase_num] == self.planning_phase_name:
+                    self.board.objects[p].action_plan_finalized = True
+            self.update_phase()
+            return True
+        return False
 
     ##############################
     # PHASE PLANNING & EXECUTION #
@@ -483,6 +512,8 @@ class DiceAdventure:
             self.tracker.update(target="game", metric_name="new_phase", phase=self.phases[self.phase_num])
 
         self.phase_num = (self.phase_num + 1) % len(self.phases)
+        # Reset countdown timer
+        self.countdown_timer = time()
 
         # Check if players need respawning
         self.check_player_status()
@@ -674,11 +705,16 @@ class DiceAdventure:
 
                 # If player dies, remove from board
                 if p.health <= 0:
+
                     if self.track_metrics:
                         self.tracker.update(target="player", player=p.name, metric_name="death")
                     p.health = 0
+                    # Player loses a life
+                    p.lives -= 1
                     p.dead = True
                     p.death_round = self.num_rounds
+                    if p.lives <= 0:
+                        p.can_respawn = False
             # Traps are destroyed
             if enemy_type == "Trap":
                 self.board.multi_remove(enemies)

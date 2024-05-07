@@ -6,6 +6,7 @@
 	  "VALID_PIN_TYPES": ["pinga", "pingb", "pingc", "pingd"],
 	  "VALID_MOVE_ACTIONS": ["left", "right", "up", "down", "wait", "submit"]
 	},
+	"COUNTDOWN_TIMER_SECONDS": 30,
 	"METRICS": {
 	  "DIRECTORIES": {
 		"LOGFILES": "train/{}/metrics/gameplay/",
@@ -38,7 +39,7 @@
 	  "ENEMY_SIZE_MAPPING": {"S": 0, "M": 1, "L": 2, "XL": 3}
 	},
 	"PLAYERS": {
-	  "PLAYER_CODE_MAPPING": {"Dwarf": "1S", "Giant": "2S", "Human": "3S"}
+	  "PLAYER_CODE_MAPPING": {"Dwarf": "C1", "Giant": "C2", "Human": "C3"}
 	},
 	"OTHER": {
 	  "PIN": {
@@ -51,33 +52,36 @@
 	  }
 	},
 	"OBJECT_CODES": {
-	  "1S": {
+	  "C1": {
 		"NAME": "Dwarf",
 		"TYPE": "Dwarf",
 		"ACTION_POINTS": 6,
 		"MAX_POINTS": 6,
 		"HEALTH": 3,
+		"LIVES": 3,
 		"SIGHT_RANGE": 1,
 		"DICE_ROLLS":  {"MONSTER": {"VAL": 8, "CONST": 0}, "TRAP": {"VAL": 6, "CONST": 0}, "STONE": {"VAL": 6, "CONST": 0}}},
-	  "2S": {
+	  "C2": {
 		"NAME": "Giant",
 		"TYPE": "Giant",
 		"ACTION_POINTS": 2,
 		"MAX_POINTS": 2,
 		"HEALTH": 3,
+		"LIVES": 3,
 		"SIGHT_RANGE": 3,
 		"DICE_ROLLS":  {"MONSTER": {"VAL": 6, "CONST": 0}, "TRAP": {"VAL": 8, "CONST": 0}, "STONE": {"VAL": 4, "CONST": 0}}},
-	  "3S": {
+	  "C3": {
 		"NAME": "Human",
 		"TYPE": "Human",
 		"ACTION_POINTS": 4,
 		"MAX_POINTS": 4,
 		"HEALTH": 3,
+		"LIVES": 3,
 		"SIGHT_RANGE": 2,
 		"DICE_ROLLS":  {"MONSTER": {"VAL": 6, "CONST": 0}, "TRAP": {"VAL": 4, "CONST": 0}, "STONE": {"VAL": 8, "CONST": 0}}},
-	  "1G": {"NAME": "Shrine", "TYPE": "shrine"},
-	  "2G": {"NAME": "Shrine", "TYPE": "shrine"},
-	  "3G": {"NAME": "Shrine", "TYPE": "shrine"},
+	  "K1": {"NAME": "Shrine", "TYPE": "shrine"},
+	  "K2": {"NAME": "Shrine", "TYPE": "shrine"},
+	  "K3": {"NAME": "Shrine", "TYPE": "shrine"},
 	  "M1": {"NAME": "Monster","TYPE": "monster", "DICE_ROLLS":  {"VAL": 4, "CONST": 0}, "ACTION_POINTS": 2},
 	  "M2": {"NAME": "Monster", "TYPE": "monster", "DICE_ROLLS":  {"VAL": 6, "CONST": 0}, "ACTION_POINTS": 2},
 	  "M3": {"NAME": "Monster", "TYPE": "monster", "DICE_ROLLS":  {"VAL": 8, "CONST": 0}, "ACTION_POINTS": 2},
@@ -98,38 +102,6 @@
   	}
   },
   "GYM_ENVIRONMENT": {
-	"REWARD": {
-	  "CODES": {
-		"0": "Personal Goal Reached",
-		"1": "New Level/Tower Reached",
-		"2": "Health Lost/Dead",
-		"3": "Has Not Moved"
-	  }
-	},
-	"OBSERVATION": {
-	  "OBJECT_POSITIONS": {
-		"Human": 0,
-		"Dwarf": 1,
-		"Giant": 2,
-		"shrine": 3,
-		"wall": 4,
-		"S_Monster": 5,
-		"M_Monster": 5,
-		"L_Monster": 5,
-		"XL_Monster": 5,
-		"S_Trap": 6,
-		"M_Trap": 6,
-		"L_Trap": 6,
-		"S_Stone": 7,
-		"M_Stone": 7,
-		"L_Stone": 7,
-		"goal": 8,
-		"pin": 9
-	  }
-	},
-	"METRICS": {
-	  "DIRECTORY": "train/{}/metrics/env/"
-	},
 	"UNITY": {
 	  "URL": "ws://localhost:4649/hmt/{}"
 	}

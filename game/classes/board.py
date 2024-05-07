@@ -3,7 +3,7 @@ from collections import defaultdict
 from random import shuffle
 import re
 from tabulate import tabulate
-from classes.game_objects import *
+from game.classes.game_objects import *
 
 
 class Board:
@@ -54,7 +54,7 @@ class Board:
         if self.obj_counts[obj_code] > 1:
             index += f"({self.obj_counts[obj_code]})"
         # Player objects
-        if re.match("\\dS", obj_code):
+        if re.match("C\\d", obj_code):
             obj = Player(obj_code=obj_code,
                          index=index,
                          index_num=self.obj_counts[obj_code],
@@ -63,6 +63,7 @@ class Board:
                          y=y_pos,
                          action_points=self.config["OBJECT_INFO"]["OBJECT_CODES"][obj_code]["ACTION_POINTS"],
                          health=self.config["OBJECT_INFO"]["OBJECT_CODES"][obj_code]["HEALTH"],
+                         lives=self.config["OBJECT_INFO"]["OBJECT_CODES"][obj_code]["LIVES"],
                          sight_range=self.config["OBJECT_INFO"]["OBJECT_CODES"][obj_code]["SIGHT_RANGE"],
                          dice_rolls=self.config["OBJECT_INFO"]["OBJECT_CODES"][obj_code]["DICE_ROLLS"])
         # Enemy objects
@@ -92,7 +93,7 @@ class Board:
                             x=x_pos,
                             y=y_pos)
             # Shrine objects
-            elif re.match("\\dG", obj_code):
+            elif re.match("K\\d", obj_code):
                 obj = Shrine(obj_code=obj_code,
                              index=index,
                              index_num=self.obj_counts[obj_code],
