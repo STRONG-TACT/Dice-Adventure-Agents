@@ -6,6 +6,7 @@
 	  "VALID_PIN_TYPES": ["pinga", "pingb", "pingc", "pingd"],
 	  "VALID_MOVE_ACTIONS": ["left", "right", "up", "down", "wait", "submit"]
 	},
+	"COUNTDOWN_TIMER_SECONDS": 30,
 	"METRICS": {
 	  "DIRECTORIES": {
 		"LOGFILES": "train/{}/metrics/gameplay/",
@@ -34,102 +35,239 @@
   	}
   },
   "OBJECT_INFO": {
-	"ENEMIES": {
-	  "ENEMY_SIZE_MAPPING": {"S": 0, "M": 1, "L": 2, "XL": 3}
-	},
-	"PLAYERS": {
-	  "PLAYER_CODE_MAPPING": {"Dwarf": "1S", "Giant": "2S", "Human": "3S"}
-	},
-	"OTHER": {
-	  "PIN": {
-		"PIN_CODE_MAPPING": {
-		  "pinga": "PA",
-		  "pingb": "PB",
-		  "pingc": "PC",
-		  "pingd": "PD"
-	  	}
+	"OBJECT_CODE_MAPPINGS": {
+	  "PINS": {
+		"pinga": "PA",
+		"pingb": "PB",
+		"pingc": "PC",
+		"pingd": "PD"
+	  },
+	  "PLAYERS": {
+		"Dwarf": "C1",
+		"Giant": "C2",
+		"Human": "C3"
 	  }
 	},
 	"OBJECT_CODES": {
-	  "1S": {
+	  "C1": {
 		"NAME": "Dwarf",
+		"ENTITY_TYPE": "Dwarf",
 		"TYPE": "Dwarf",
 		"ACTION_POINTS": 6,
 		"MAX_POINTS": 6,
 		"HEALTH": 3,
+		"LIVES": 3,
 		"SIGHT_RANGE": 1,
-		"DICE_ROLLS":  {"MONSTER": {"VAL": 8, "CONST": 0}, "TRAP": {"VAL": 6, "CONST": 0}, "STONE": {"VAL": 6, "CONST": 0}}},
-	  "2S": {
+		"DICE_ROLLS":  {
+		  "MONSTER": {
+			"VAL": 8,
+			"CONST": 0
+		  },
+		  "TRAP": {
+			"VAL": 6,
+			"CONST": 0
+		  },
+		  "STONE": {
+			"VAL": 6,
+			"CONST": 0
+		  }
+		}
+	  },
+	  "C2": {
 		"NAME": "Giant",
+		"ENTITY_TYPE": "Giant",
 		"TYPE": "Giant",
 		"ACTION_POINTS": 2,
 		"MAX_POINTS": 2,
 		"HEALTH": 3,
+		"LIVES": 3,
 		"SIGHT_RANGE": 3,
-		"DICE_ROLLS":  {"MONSTER": {"VAL": 6, "CONST": 0}, "TRAP": {"VAL": 8, "CONST": 0}, "STONE": {"VAL": 4, "CONST": 0}}},
-	  "3S": {
+		"DICE_ROLLS":  {
+		  "MONSTER": {
+			"VAL": 6,
+			"CONST": 0
+		  },
+		  "TRAP": {
+			"VAL": 8,
+			"CONST": 0
+		  }, "STONE": {
+			"VAL": 4,
+			"CONST": 0
+		  }
+		}
+	  },
+	  "C3": {
 		"NAME": "Human",
+		"ENTITY_TYPE": "Human",
 		"TYPE": "Human",
 		"ACTION_POINTS": 4,
 		"MAX_POINTS": 4,
 		"HEALTH": 3,
+		"LIVES": 3,
 		"SIGHT_RANGE": 2,
-		"DICE_ROLLS":  {"MONSTER": {"VAL": 6, "CONST": 0}, "TRAP": {"VAL": 4, "CONST": 0}, "STONE": {"VAL": 8, "CONST": 0}}},
-	  "1G": {"NAME": "Shrine", "TYPE": "shrine"},
-	  "2G": {"NAME": "Shrine", "TYPE": "shrine"},
-	  "3G": {"NAME": "Shrine", "TYPE": "shrine"},
-	  "M1": {"NAME": "Monster","TYPE": "monster", "DICE_ROLLS":  {"VAL": 4, "CONST": 0}, "ACTION_POINTS": 2},
-	  "M2": {"NAME": "Monster", "TYPE": "monster", "DICE_ROLLS":  {"VAL": 6, "CONST": 0}, "ACTION_POINTS": 2},
-	  "M3": {"NAME": "Monster", "TYPE": "monster", "DICE_ROLLS":  {"VAL": 8, "CONST": 0}, "ACTION_POINTS": 2},
-	  "M4": {"NAME": "Monster", "TYPE": "monster", "DICE_ROLLS": {"VAL": 10, "CONST": 0}, "ACTION_POINTS": 2},
-	  "T1": {"NAME": "Trap", "TYPE": "trap", "DICE_ROLLS":  {"VAL": 4, "CONST": 2}},
-	  "T2": {"NAME": "Trap", "TYPE": "trap", "DICE_ROLLS":  {"VAL": 4, "CONST": 2}},
-	  "T3": {"NAME": "Trap", "TYPE": "trap", "DICE_ROLLS":  {"VAL": 4, "CONST": 2}},
-	  "S1": {"NAME": "Stone", "TYPE": "stone", "DICE_ROLLS":  {"VAL": 0, "CONST": 5}},
-	  "S2": {"NAME": "Stone", "TYPE": "stone", "DICE_ROLLS":  {"VAL": 0, "CONST": 5}},
-	  "S3": {"NAME": "Stone", "TYPE": "stone", "DICE_ROLLS":  {"VAL": 0, "CONST": 5}},
-	  "..": {"NAME": "Empty_Space", "TYPE": "empty_space"},
-	  "**": {"NAME": "Tower", "TYPE": "goal"},
-	  "##": {"NAME": "Wall", "TYPE": "wall"},
-	  "PA": {"NAME": "PA", "TYPE": "pin"},
-	  "PB": {"NAME": "PB", "TYPE": "pin"},
-	  "PC": {"NAME": "PC", "TYPE": "pin"},
-	  "PD": {"NAME": "PD", "TYPE": "pin"}
-  	}
+		"DICE_ROLLS":  {
+		  "MONSTER": {
+			"VAL": 6,
+			"CONST": 0
+		  }, "TRAP": {
+			"VAL": 4,
+			"CONST": 0
+		  }, "STONE": {
+			"VAL": 8,
+			"CONST": 0
+		  }
+		}
+	  },
+	  "K1": {
+		"NAME": "Shrine",
+		"TYPE": "Shrine",
+		"ENTITY_TYPE": "Shrine",
+		"CHARACTER": "Dwarf"
+	  },
+	  "K2": {
+		"NAME": "Shrine",
+		"TYPE": "Shrine",
+		"ENTITY_TYPE": "Shrine",
+		"CHARACTER": "Giant"
+	  },
+	  "K3": {
+		"NAME": "Shrine",
+		"TYPE": "Shrine",
+		"ENTITY_TYPE": "Shrine",
+		"CHARACTER": "Human"
+	  },
+	  "M1": {
+		"NAME": "Monster",
+		"ENTITY_TYPE": "Monster",
+		"TYPE": "S_Monster",
+		"DICE_ROLLS": {
+		  "VAL": 4,
+		  "CONST": 0
+		},
+		"ACTION_POINTS": 2
+	  },
+	  "M2": {
+		"NAME": "Monster",
+		"ENTITY_TYPE": "Monster",
+		"TYPE": "M_Monster",
+		"DICE_ROLLS": {
+		  "VAL": 6,
+		  "CONST": 0
+		},
+		"ACTION_POINTS": 2
+	  },
+	  "M3": {
+		"NAME": "Monster",
+		"ENTITY_TYPE": "Monster",
+		"TYPE": "L_Monster",
+		"DICE_ROLLS": {
+		  "VAL": 8,
+		  "CONST": 0
+		},
+		"ACTION_POINTS": 2
+	  },
+	  "M4": {
+		"NAME": "Monster",
+		"ENTITY_TYPE": "Monster",
+		"TYPE": "XL_Monster",
+		"DICE_ROLLS": {
+		  "VAL": 10,
+		  "CONST": 0
+		},
+		"ACTION_POINTS": 2
+	  },
+	  "T1": {
+		"NAME": "Trap",
+		"ENTITY_TYPE": "Trap",
+		"TYPE": "S_Trap",
+		"DICE_ROLLS": {
+		  "VAL": 4,
+		  "CONST": 2
+		}
+	  },
+	  "T2": {
+		"NAME": "Trap",
+		"ENTITY_TYPE": "Trap",
+		"TYPE": "M_Trap",
+		"DICE_ROLLS": {
+		  "VAL": 4,
+		  "CONST": 2
+		}
+	  },
+	  "T3": {
+		"NAME": "Trap",
+		"ENTITY_TYPE": "Trap",
+		"TYPE": "L_Trap",
+		"DICE_ROLLS": {
+		  "VAL": 4,
+		  "CONST": 2
+		}
+	  },
+	  "S1": {
+		"NAME": "Stone",
+		"ENTITY_TYPE": "Stone",
+		"TYPE": "S_Stone",
+		"DICE_ROLLS": {
+		  "VAL": 0,
+		  "CONST": 5
+		}
+	  },
+	  "S2": {
+		"NAME": "Stone",
+		"ENTITY_TYPE": "Stone",
+		"TYPE": "M_Stone",
+		"DICE_ROLLS": {
+		  "VAL": 0,
+		  "CONST": 5
+		}
+	  },
+	  "S3": {
+		"NAME": "Stone",
+		"ENTITY_TYPE": "Stone",
+		"TYPE": "L_Stone",
+		"DICE_ROLLS": {
+		  "VAL": 0,
+		  "CONST": 5
+		}
+	  },
+	  "..": {
+		"NAME": "Open",
+		"ENTITY_TYPE": "Open",
+		"TYPE": "Open"
+	  },
+	  "**": {
+		"NAME": "Tower",
+		"ENTITY_TYPE": "Goal",
+		"TYPE": "Goal"
+	  },
+	  "##": {
+		"NAME": "Wall",
+		"ENTITY_TYPE": "Wall",
+		"TYPE": "Wall"
+	  },
+	  "PA": {
+		"NAME": "PA",
+		"ENTITY_TYPE": "Pin",
+		"TYPE": "Pin"
+	  },
+	  "PB": {
+		"NAME": "PB",
+		"ENTITY_TYPE": "Pin",
+		"TYPE": "Pin"
+	  },
+	  "PC": {
+		"NAME": "PC",
+		"ENTITY_TYPE": "Pin",
+		"TYPE": "Pin"
+	  },
+	  "PD": {
+		"NAME": "PD",
+		"ENTITY_TYPE": "Pin",
+		"TYPE": "Pin"
+	  }
+	}
   },
   "GYM_ENVIRONMENT": {
-	"REWARD": {
-	  "CODES": {
-		"0": "Personal Goal Reached",
-		"1": "New Level/Tower Reached",
-		"2": "Health Lost/Dead",
-		"3": "Has Not Moved"
-	  }
-	},
-	"OBSERVATION": {
-	  "OBJECT_POSITIONS": {
-		"Human": 0,
-		"Dwarf": 1,
-		"Giant": 2,
-		"shrine": 3,
-		"wall": 4,
-		"S_Monster": 5,
-		"M_Monster": 5,
-		"L_Monster": 5,
-		"XL_Monster": 5,
-		"S_Trap": 6,
-		"M_Trap": 6,
-		"L_Trap": 6,
-		"S_Stone": 7,
-		"M_Stone": 7,
-		"L_Stone": 7,
-		"goal": 8,
-		"pin": 9
-	  }
-	},
-	"METRICS": {
-	  "DIRECTORY": "train/{}/metrics/env/"
-	},
 	"UNITY": {
 	  "URL": "ws://localhost:4649/hmt/{}"
 	}
