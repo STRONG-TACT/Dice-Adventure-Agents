@@ -141,7 +141,6 @@ class DiceAdventurePythonEnv(Env):
             next_state = self.get_state()
         else:
             url = self.unity_socket_url.format(player.lower())
-            # TODO CAPTURE RESPONSE AND RETURN TO USER
             unity_socket.execute_action(url, game_action)
             next_state = self.get_state()
         return next_state
