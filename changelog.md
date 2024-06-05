@@ -17,3 +17,18 @@ Any changes to the code in this repository will be tracked and communicated here
 - **New Object Codes**: In the Python version, player codes have been changed from `1S, 2S, and 3S to C1, C2, and C3` for 
   the Dwarf, Giant, and Human, respectively, and shrine codes have been changed from `1G, 2G, and 3G to K1, K2, and K3`
   (K for "key shrines") to follow the same pattern as other object codes.
+
+
+*6/5/2024*
+- **New Character Argument**: We added an argument to the DiceAdventureAgent class `character` so that the agent can
+  know which character to submit actions for. This will be useful since agents may need to play as any character and may 
+  have special logic for different players. 
+- **Environment File Changes**:
+  - We modified the `step()` function so that depending on the value of `self.train_mode`, the agent will learn 
+    (train_mode==True) or simply play (train_mode==False). the interface to the step function remains the same.
+  - We added two helper functions `get_actions()` that returns a list of all game actions and `get_player_names()` 
+    that returns a list of all 3 character names in the game.
+- **Example Agent**: We added an example agent `examples/production_agent` that implements the DiceAdventureAgent class
+  and plays based on conditional if/elif/else rules. You should be able to modify the `play_game.py` file to reference
+  this agent and have it play the game. One note is that based on its movement logic, it can get stuck behind walls so
+  this is something a more robust agent would need to improve on.

@@ -1,16 +1,19 @@
 from random import choice
 
-
 class DiceAdventureAgent:
     """
     Provides a uniform interface to connect agents to Dice Adventure environment.
-    Developers must implement the load() and take_action() functions.
+    Developers must implement the take_action() function.
     - init():         Initialize any needed variables.
     - take_action():  Determines which action to take given a state (dict) and list of actions. Note that your
                       agent does not need to use the list of actions, it is just provided for convenience.
     """
-    def __init__(self):
-        pass
+    def __init__(self, character):
+        """
+        Initialize any needed variables.
+        :param character: (string) The character the agent will play as
+        """
+        self.character = character
 
     def take_action(self, state, actions):
         """

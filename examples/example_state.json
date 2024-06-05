@@ -1,0 +1,169 @@
+{
+  "command": "get_full_state",
+  "status": "OK",
+  "message": "Full State",
+  "content": {
+    "gameData": {
+      "boardWidth": 4,
+      "boardHeight": 3,
+      "level": 1,
+      "currentPhase": "Player_Pinning"
+    },
+    "scene": [
+      {
+        "entityType": "Wall",
+        "objKey": "##",
+        "id": "##1",
+        "x": 0,
+        "y": 0
+      },
+      {
+        "entityType": "Goal",
+        "objKey": "**",
+        "id": "**1",
+        "x": 0,
+        "y": 1,
+        "subGoalCount": 0
+      },
+      {
+        "entityType": "Wall",
+        "objKey": "##",
+        "id": "##2",
+        "x": 0,
+        "y": 2
+      },
+      {
+        "entityType": "Open",
+        "objKey": "..",
+        "id": "..1",
+        "x": 1,
+        "y": 0,
+        "subGoalCount": 0
+      },
+      {
+        "entityType": "Shrine",
+        "objKey": "1G",
+        "id": "1G1",
+        "character": "Dwarf",
+        "reached": true,
+        "x": 1,
+        "y": 0
+      },
+      {
+        "entityType": "Open",
+        "objKey": "..",
+        "id": "..2",
+        "x": 1,
+        "y": 1,
+        "subGoalCount": 0
+      },
+      {
+        "entityType": "Shrine",
+        "objKey": "2G",
+        "id": "2G1",
+        "character": "Giant",
+        "reached": true,
+        "x": 1,
+        "y": 1
+      },
+      {
+        "entityType": "Open",
+        "objKey": "..",
+        "id": "..3",
+        "x": 1,
+        "y": 2,
+        "subGoalCount": 0
+      },
+      {
+        "entityType": "Shrine",
+        "objKey": "3G",
+        "id": "3G1",
+        "character": "Human",
+        "reached": true,
+        "x": 1,
+        "y": 2
+      },
+      {
+        "name": "Dwarf",
+        "characterId": 0,
+        "type": "Dwarf",
+        "sightRange": 1,
+        "monsterDice": "D6+0",
+        "trapDice": "D8+0",
+        "stoneDice": "D4+0",
+        "health": 3,
+        "dead": false,
+        "actionPoints": 6,
+        "actionPlan": [],
+        "x": 2,
+        "y": 0,
+        "pinCursorX": 2,
+        "pinCursorY": 2
+      },
+      {
+        "name": "Giant",
+        "characterId": 1,
+        "type": "Giant",
+        "sightRange": 3,
+        "monsterDice": "D6+0",
+        "trapDice": "D4+0",
+        "stoneDice": "D8+0",
+        "health": 3,
+        "dead": false,
+        "actionPoints": 2,
+        "actionPlan": [],
+        "x": 2,
+        "y": 1,
+        "pinCursorX": 2,
+        "pinCursorY": 2
+      },
+      {
+        "name": "Human",
+        "characterId": 2,
+        "type": "Human",
+        "sightRange": 2,
+        "monsterDice": "D8+0",
+        "trapDice": "D6+0",
+        "stoneDice": "D6+0",
+        "health": 3,
+        "dead": false,
+        "actionPoints": 4,
+        "actionPlan": [],
+        "x": 2,
+        "y": 2,
+        "pinCursorX": 2,
+        "pinCursorY": 2
+      },
+      {
+        "entityType": "monster",
+        "objKey": "M1",
+        "id": "M11",
+        "type": "S_Monster",
+        "actionPoints": 2,
+        "combatDice": "D4+0",
+        "x": 3,
+        "y": 0
+      },
+      {
+        "entityType": "monster",
+        "objKey": "M2",
+        "id": "M21",
+        "type": "M_Monster",
+        "actionPoints": 1,
+        "combatDice": "D6+0",
+        "x": 3,
+        "y": 1
+      },
+      {
+        "entityType": "monster",
+        "objKey": "M1",
+        "id": "M12",
+        "type": "S_Monster",
+        "actionPoints": 2,
+        "combatDice": "D4+0",
+        "x": 3,
+        "y": 2
+      }
+    ]
+  }
+}

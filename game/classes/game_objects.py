@@ -2,42 +2,38 @@ from random import choice
 
 
 class GameObject:
-    def __init__(self, obj_code, index, index_num, x, y, type_):
+    def __init__(self, obj_code, index, index_num, x, y, type_, entity_type):
         self.obj_code = obj_code
         self.index = index
         self.index_num = index_num
         self.type = type_
+        self.entity_type = entity_type
         self.x = x
         self.y = y
 
 
 class Goal(GameObject):
-    def __init__(self, obj_code, index, index_num, name, type_, x, y):
-        super().__init__(obj_code, index, index_num, x, y, type_)
+    def __init__(self, obj_code, index, index_num, name, type_, entity_type, x, y):
+        super().__init__(obj_code, index, index_num, x, y, type_, entity_type)
         self.name = name
         self.reached = False
 
 
 class Shrine(Goal):
-    def __init__(self, obj_code, index, index_num, name, type_, x, y, player_code):
-        super().__init__(obj_code, index, index_num, name, type_, x, y)
-        self.player = self.get_player(player_code)
-
-    @staticmethod
-    def get_player(player_code):
-        player_goal_map = {"1": "Dwarf", "2": "Giant", "3": "Human"}
-        return player_goal_map[player_code]
+    def __init__(self, obj_code, index, index_num, name, type_, entity_type, x, y, character):
+        super().__init__(obj_code, index, index_num, name, type_, entity_type, x, y)
+        self.player = character
 
 
 class Tower(Goal):
-    def __init__(self, obj_code, index, index_num, name, type_, x, y):
-        super().__init__(obj_code, index, index_num, name, type_, x, y)
+    def __init__(self, obj_code, index, index_num, name, type_, entity_type, x, y):
+        super().__init__(obj_code, index, index_num, name, type_, entity_type, x, y)
         self.subgoal_count = 0
 
 
 class Enemy(GameObject):
-    def __init__(self, obj_code, index, index_num, name, type_, x, y, dice_rolls, action_points=None):
-        super().__init__(obj_code, index, index_num, x, y, type_)
+    def __init__(self, obj_code, index, index_num, name, type_, entity_type, x, y, dice_rolls, action_points=None):
+        super().__init__(obj_code, index, index_num, x, y, type_, entity_type)
         self.name = name
         self.dice_rolls = dice_rolls
         self.action_points = action_points
@@ -53,8 +49,8 @@ class Enemy(GameObject):
 
 
 class Player(GameObject):
-    def __init__(self, obj_code, index, index_num, name, x, y, action_points, health, lives, sight_range, dice_rolls):
-        super().__init__(obj_code, index, index_num, x, y, type_=name)
+    def __init__(self, obj_code, index, index_num, name, x, y, type_, entity_type, action_points, health, lives, sight_range, dice_rolls):
+        super().__init__(obj_code, index, index_num, x, y, type_, entity_type)
         # Indexing
         self.name = name
         # Stats
@@ -137,8 +133,8 @@ class Player(GameObject):
 
 
 class Pin(GameObject):
-    def __init__(self, obj_code, index, index_num, x, y, placed_by, type_):
-        super().__init__(obj_code, index, index_num, x, y, type_)
+    def __init__(self, obj_code, index, index_num, x, y, placed_by, type_, entity_type):
+        super().__init__(obj_code, index, index_num, x, y, type_, entity_type)
         self.name = obj_code
         self.placed_by = placed_by
 

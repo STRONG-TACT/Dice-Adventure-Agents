@@ -33,7 +33,7 @@ class DiceAdventure:
         self.levels = {}
         self.levels_directory = "game/levels/"
         self.limit_levels = limit_levels if limit_levels \
-            else [i for i in range(len(listdir(self.levels_directory)))]
+            else [i+1 for i in range(len(listdir(self.levels_directory)))]
         self.get_levels()
         # Level Control
         self.curr_level_num = level if level in self.limit_levels else self.limit_levels[0]
@@ -46,7 +46,7 @@ class DiceAdventure:
         self.empty = ".."
         self.tower = "**"
         self.wall = "##"
-        self.player_code_mapping = self.config["OBJECT_INFO"]["PLAYERS"]["PLAYER_CODE_MAPPING"]
+        self.player_code_mapping = self.config["OBJECT_INFO"]["OBJECT_CODE_MAPPINGS"]["PLAYERS"]
 
         # Places a cap on the number of rounds per level
         self.round_cap = round_cap
@@ -71,7 +71,7 @@ class DiceAdventure:
         self.pinning_phase_name = self.config["GAMEPLAY"]["PHASES"]["PINNING_PHASE_NAME"]
         self.valid_pin_actions = self.config["GAMEPLAY"]["ACTIONS"]["VALID_PIN_ACTIONS"]
         self.valid_pin_types = self.config["GAMEPLAY"]["ACTIONS"]["VALID_PIN_TYPES"]
-        self.pin_code_mapping = self.config["OBJECT_INFO"]["OTHER"]["PIN"]["PIN_CODE_MAPPING"]
+        self.pin_code_mapping = self.config["OBJECT_INFO"]["OBJECT_CODE_MAPPINGS"]["PINS"]
         # Action Planning
         self.planning_phase_name = self.config["GAMEPLAY"]["PHASES"]["PLANNING_PHASE_NAME"]
         self.valid_move_actions = self.config["GAMEPLAY"]["ACTIONS"]["VALID_MOVE_ACTIONS"]
@@ -164,7 +164,6 @@ class DiceAdventure:
         else:
             # Otherwise, move on to next level
             self.curr_level_num += 1
-        # print(f"CHANGING TO LEVEL: {self.curr_level_num}", self.lvl_repeats, self.num_calls)
         self.lvl_repeats[self.curr_level_num] -= 1
         # Track whether moved to new level or repeated same level
         if self.track_metrics:
@@ -183,6 +182,8 @@ class DiceAdventure:
         :return: Dict
         """
         self.check_countdown_timer()
+        if self.terminated:
+            return
 
         state = {
             "command": "get_state",
@@ -216,9 +217,11 @@ class DiceAdventure:
                 continue
             # Walls
             if obj_dict is None:
-                state["content"]["scene"].append({"id": f"##-{wall_count}",
-                                                  "objectCode": "##",
-                                                  "entityType": "wall",
+                wall_object_code = "##"
+
+                state["content"]["scene"].append({"id": f"{wall_object_code}{wall_count}",
+                                                  "objKey": wall_object_code,
+                                                  "entityType": self.config["OBJECT_INFO"]["OBJECT_CODES"][wall_object_code]["ENTITY_TYPE"],
                                                   "x": int(pos[1]),
                                                   "y": int(pos[0])})
                 wall_count += 1
@@ -226,9 +229,9 @@ class DiceAdventure:
                 for o in obj_dict:
                     obj = obj_dict[o]
 
-                    ele = {"id": f"{obj.obj_code}-{obj.index_num}",
-                           "objectCode": obj.obj_code,
-                           "entityType": obj.type,
+                    ele = {"id": f"{obj.obj_code}{obj.index_num}",
+                           "objKey": obj.obj_code,
+                           "entityType": obj.entity_type,
                            "x": obj.x,
                            "y": obj.y}
 
@@ -236,13 +239,14 @@ class DiceAdventure:
                         # Can return player data ONLY if in current sight range or if giving full state
                         if version == "full" or pos in sight_range:
                             ele.update({
-                                "characterId": int(obj.obj_code[0]),
+                                "characterId": int(obj.obj_code[1]),
                                 "health": obj.health,
                                 "lives": obj.lives,
                                 "dead": obj.dead
                             })
-                            # Only provide extra this information if state being provided is for given character
-                            if obj.obj_code == player_obj.obj_code:
+                            # Only provide this information if state being provided is for given character or if giving
+                            # full state
+                            if obj.obj_code == player_obj.obj_code or version == "full":
                                 ele.update({
                                     "pinCursorX": obj.pin_x,
                                     "pinCursorY": obj.pin_y,
@@ -269,7 +273,6 @@ class DiceAdventure:
                         # returned even if not in sight range but have been seen before when 'version' is 'fow'
                         if version == "full" or obj.name != "Monster" or (obj.name == "Monster" and pos in sight_range):
                             ele.update({
-                                "id": f"{obj.obj_code}-{obj.index_num}",
                                 "combatDice": f"D{obj.dice_rolls['VAL']}+{obj.dice_rolls['CONST']}"
                             })
                             # Action points only apply to monsters
@@ -278,7 +281,6 @@ class DiceAdventure:
                     # Pins
                     elif isinstance(obj, Pin):
                         ele.update({
-                            "id": f"{obj.obj_code}-{obj.index_num}",
                             "placedBy": obj.placed_by
                         })
                     state["content"]["scene"].append(ele)
@@ -294,8 +296,8 @@ class DiceAdventure:
         :param action: The action to apply
         :return: N/A
         """
-        if self.check_countdown_timer():
-            # No-op because phase timer ran out
+        if self.check_countdown_timer() or self.terminated:
+            # No-op because phase timer ran out or game is terminated
             return
 
         player_code = self.player_code_mapping[player]
@@ -309,14 +311,6 @@ class DiceAdventure:
             self.pin_planning(player_code, action)
         elif self.phases[self.phase_num] == self.planning_phase_name:
             self.action_planning(player_code, action)
-        # If all characters have exhausted their action points, move phase along
-        # If this is turned off, all players must submit first before progressing
-        # if all([obj.action_points <= 0 for obj in self.board.objects.values() if isinstance(obj, Player)]):
-        #     print("EXHAUSTED ACTION POINTS!")
-        #    self.update_phase()
-        # Render grid
-        # if self.render_game:
-        #    self.render()
 
     def check_player_status(self):
         """
@@ -448,6 +442,7 @@ class DiceAdventure:
             elif self.board.objects[player].action_points > 0:
                 curr_x = self.board.objects[player].action_path_x
                 curr_y = self.board.objects[player].action_path_y
+                # print(f"{player} ACTION PATH: ({curr_x}, {curr_y})")
                 # Test whether action supplied by agent was a valid move
                 if not self.board.valid_move(curr_x, curr_y, action):
                     # No-op/invalid action
@@ -488,6 +483,9 @@ class DiceAdventure:
                          if not self.board.objects[p].dead]):
             # Update phase to player execution
             self.update_phase()
+            # Reset action points
+            for p in self.player_code_mapping.values():
+                self.board.objects[p].action_points = self.board.objects[p].max_action_points
 
             if self.execute_plans():
                 self.next_level()
@@ -546,10 +544,11 @@ class DiceAdventure:
                     self.board.move(p, action, delete=False)
 
                     # Check if player has reached goal
-                    goal_code = p[0] + "G"
+                    goal_code = "K" + p[1]
                     if not self.board.objects[p].goal_reached and self.board.at(p, goal_code):
                         # Indicate goal reached
                         self.board.objects[p].goal_reached = True
+                        self.board.objects[goal_code].reached = True
                         # Destroy goal
                         # self.board.remove(goal_code)
                         # Increment subgoal counter
@@ -655,7 +654,7 @@ class DiceAdventure:
         :return: N/A
         """
         # Enemies are always all the same type
-        enemy_type = enemies[0].name
+        enemy_type = enemies[0].entity_type
         player_rolls = sum([p.get_dice_roll(enemy_type) for p in players])
         enemy_rolls = sum([e.get_dice_roll() for e in enemies])
 
