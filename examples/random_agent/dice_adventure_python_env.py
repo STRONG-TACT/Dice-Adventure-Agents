@@ -13,7 +13,7 @@ class DiceAdventurePythonEnv(Env):
                  id_=0,
                  train_mode=False,
                  server="local",
-                 state_version="character",
+                 state_version="player",
                  **kwargs):
         """
         Init function for Dice Adventure gym environment.
@@ -30,14 +30,13 @@ class DiceAdventurePythonEnv(Env):
         self.player = player
         self.id = id_
         self.kwargs = kwargs
+        self.actions = ["up", "down", "left", "right", "wait", "undo", "submit", "pinga", "pingb", "pingc", "pingd"]
+        self.player_names = ["Dwarf", "Giant", "Human"]
 
         ##################
         # STATE SETTINGS #
         ##################
-        self.state_version = state_version
-        self.mask_radii = {"Dwarf": self.config["OBJECT_INFO"]["OBJECT_CODES"]["1S"]["SIGHT_RANGE"],
-                           "Giant": self.config["OBJECT_INFO"]["OBJECT_CODES"]["2S"]["SIGHT_RANGE"],
-                           "Human": self.config["OBJECT_INFO"]["OBJECT_CODES"]["3S"]["SIGHT_RANGE"]}
+        self.state_version = state_version if state_version in ["full", "player", "fow"] else "player"
 
         ##################
         # TRAIN SETTINGS #
@@ -49,18 +48,37 @@ class DiceAdventurePythonEnv(Env):
         ###################
         self.server = server
         self.unity_socket_url = self.config["GYM_ENVIRONMENT"]["UNITY"]["URL"]
-        self.game = None
-
-        if self.server == "local":
-            self.game = DiceAdventure(**self.kwargs)
+        self.game = DiceAdventure(**self.kwargs) if self.server == "local" else None
 
     def step(self, action):
+        """
+        Applies the given action to the game.
+        If self.train_mode == True, passes action to _step_train() and returns new information for RL model.
+        If self.train_mode == False, simply returns state obtained after taking action.
+        :param action:  (string) The action produced by the agent
+        :return:        (dict, float, bool, bool, dict) or (dict)
+        """
+        if self.train_mode:
+            return self._step_train(action)
+        else:
+            return self._step_play(action)
+
+    def _step_train(self, action):
         """
         Applies the given action to the game. Determines the next observation and reward,
         whether the training should terminate, whether training should be truncated, and
         additional info.
         :param action:  (string) The action produced by the agent
-        :return:        (dict, float, bool, bool, dict) See description
+        :return:        (dict, float, bool, bool, dict) See below
+
+        new_obs (dict) - The resulting game state after applying 'action' to the game
+        reward (float) - The reward obtained from applying 'action' to the game. This must be defined by the user. A
+                         helper function _get_reward() has been provided for convenience.
+        terminated (bool) - Whether the game has terminated after applying 'action' to the game
+        truncated (bool) - (See https://farama.org/Gymnasium-Terminated-Truncated-Step-API)
+        info (dict) - Additional information that should be passed back to model
+
+        Note: Although this framework is usually used for RL models, users can develop any kind of model with this code.
         """
         next_state = self.execute_action(self.player, action)
 
@@ -71,11 +89,18 @@ class DiceAdventurePythonEnv(Env):
         if terminated:
             new_obs, info = self.reset()
         else:
-            new_obs = self.get_state()
-            info = {}
+            new_obs, info = self.get_state(), {}
         truncated = False
 
         return new_obs, reward, terminated, truncated, info
+
+    def _step_play(self, action):
+        """
+        Applies the given action to the game and returns the resulting state
+        :param action:  (string) The action produced by the agent
+        :return:        (dict) The resulting state
+        """
+        return self.execute_action(self.player, action)
 
     def close(self):
         """
@@ -116,7 +141,9 @@ class DiceAdventurePythonEnv(Env):
             next_state = self.get_state()
         else:
             url = self.unity_socket_url.format(player.lower())
-            next_state = unity_socket.execute_action(url, game_action)
+            # TODO CAPTURE RESPONSE AND RETURN TO USER
+            unity_socket.execute_action(url, game_action)
+            next_state = self.get_state()
         return next_state
 
     def get_state(self, player=None, version=None, server=None):
@@ -125,14 +152,14 @@ class DiceAdventurePythonEnv(Env):
         :param player: (string) The player whose perspective will be used to collect the state. Can be one of
                                 {Dwarf, Giant, Human}.
         :param version: (string) The level of visibility. Can be one of {full, player, fow}
-        :param server: (string) Determines whether to get state from Python version or unity version of game. Can be
+        :param server: (string) Determines whether to get state from Python version or Unity version of game. Can be
                                 one of {local, unity}.
         :return: (dict) The state of the game
 
         The state is always given from the perspective of a player and defines how much of the level the
         player can currently "see". The following state version options define how much information this function
         returns.
-        - [full]:   Returns all objects and player stats. This ignores the 'player' parameter.
+        - [full]:   Returns all objects and player stats for current level. This ignores the 'player' parameter.
 
         - [player]: Returns all objects in the current sight range of the player. Limited information is provided about
                     other players present in the state.
@@ -142,19 +169,26 @@ class DiceAdventurePythonEnv(Env):
                     currently in the player's view. This option returns all objects in the current sight range (view) of
                     the player plus objects in positions that the player has seen before. Note that any object that can
                     move (such as monsters and other players) are only returned when they are in the player's current
-                    view.
+                    view, but static objects such as walls, stones, and traps are returned if they've been previously
+                    observed.
         """
-        version = version if version else self.state_version
-        player = player if player else self.player
+        version = version if version is not None else self.state_version
+        player = player if player is not None else self.player
         server = server if server else self.server
 
         if server == "local":
             state = self.game.get_state(player, version)
         else:
-            url = self.unity_socket_url.format(player)
+            url = self.unity_socket_url.format(player.lower())
             state = unity_socket.get_state(url, version)
 
         return state
+
+    def get_actions(self):
+        return self.actions
+
+    def get_player_names(self):
+        return self.player_names
 
     @staticmethod
     def _get_reward():

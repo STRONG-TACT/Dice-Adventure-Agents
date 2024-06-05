@@ -18,7 +18,6 @@ def get_state(url, version):
         command = "get_fog_state"
     else:
         command = "get_full_state"
-
     state = send(url, f'{{"command":"{command}"}}')
     return loads(state)
 
