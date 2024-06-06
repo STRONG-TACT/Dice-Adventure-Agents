@@ -8,16 +8,16 @@ SERVER = "local"
 
 def main():
     # Set up environment
-    env = DiceAdventurePythonEnv(server=SERVER, state_version="full")
-    state = env.reset()[0]
+    env = DiceAdventurePythonEnv(server=SERVER, state_version="fow")
     # Load agents
     players = env.get_player_names()
     agents = [DiceAdventureAgent(p) for p in players]
 
     while True:
         for agent in agents:
+            state = env.get_state(player=agent.character)
             action = agent.take_action(state=state, actions=env.get_actions())
-            state = env.execute_action(player=agent.character, game_action=action)
+            env.execute_action(player=agent.character, game_action=action)
         env.render()
         sleep(.1)
 

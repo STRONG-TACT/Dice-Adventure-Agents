@@ -236,8 +236,9 @@ class DiceAdventure:
                            "y": obj.y}
 
                     if isinstance(obj, Player):
-                        # Can return player data ONLY if in current sight range or if giving full state
-                        if version == "full" or pos in sight_range:
+                        # Can return player data ONLY if in current sight range or if giving full state or data relates
+                        # to self
+                        if version == "full" or pos in sight_range or obj.obj_code == player_obj.obj_code:
                             ele.update({
                                 "characterId": int(obj.obj_code[1]),
                                 "health": obj.health,
@@ -285,9 +286,47 @@ class DiceAdventure:
                         })
                     state["content"]["scene"].append(ele)
 
+        state["content"]["scene"].extend(self._get_player_state(player_obj, version))
+
         return state
 
-        # return state.get_state(game_state, self.config, self.board, player_obj, version)
+    def _get_player_state(self, player_obj, version):
+        players = [self.board.objects[player_code] for player_code in self.player_code_mapping.values()]
+        player_state = []
+        sight_range = player_obj.get_mask_radius()
+        pos = (player_obj.y, player_obj.x)
+        for obj in players:
+            ele = {"id": f"{obj.obj_code}{obj.index_num}",
+                   "objKey": obj.obj_code,
+                   "entityType": obj.entity_type,
+                   "x": obj.x,
+                   "y": obj.y}
+
+            # Can return player data ONLY if in current sight range or if giving full state or data relates
+            # to self
+            if version == "full" or pos in sight_range or obj.obj_code == player_obj.obj_code:
+                ele.update({
+                    "characterId": int(obj.obj_code[1]),
+                    "health": obj.health,
+                    "lives": obj.lives,
+                    "dead": obj.dead
+                })
+                # Only provide this information if state being provided is for given character or if giving
+                # full state
+                if obj.obj_code == player_obj.obj_code or version == "full":
+                    ele.update({
+                        "pinCursorX": obj.pin_x,
+                        "pinCursorY": obj.pin_y,
+                        "sightRange": obj.sight_range,
+                        "monsterDice": f"D{obj.dice_rolls['MONSTER']['VAL']}+{obj.dice_rolls['MONSTER']['CONST']}",
+                        "trapDice": f"D{obj.dice_rolls['TRAP']['VAL']}+{obj.dice_rolls['TRAP']['CONST']}",
+                        "stoneDice": f"D{obj.dice_rolls['STONE']['VAL']}+{obj.dice_rolls['STONE']['CONST']}",
+                        "actionPoints": obj.action_points,
+                        "actionPlan": obj.action_plan
+                    })
+            player_state.append(ele)
+
+        return player_state
 
     def execute_action(self, player, action):
         """
@@ -551,11 +590,11 @@ class DiceAdventure:
                         self.board.objects[goal_code].reached = True
                         # Destroy goal
                         # self.board.remove(goal_code)
-                        # Increment subgoal counter
+                        # Increment sub-goal counter
                         self.board.objects[self.tower].subgoal_count += 1
                     # Check if player has reached tower
                     if self.board.at(p, self.tower) and \
-                            all([self.board.objects[p].goal_reached for i in self.player_code_mapping.values()]):
+                            all([self.board.objects[i].goal_reached for i in self.player_code_mapping.values()]):
                         # self.update_phase()
                         return True
             # CHECK IF PLAYER AND MONSTER/TRAP/STONE IN SAME AREA AFTER
@@ -688,7 +727,8 @@ class DiceAdventure:
                         # Get last position of player
                         prev_pos = p.action_positions[step_index - 1]
                         p.action_positions = []
-                        self.board.place(p.index, x=prev_pos[1], y=prev_pos[0])
+                        # self.board.place(p.index, x=prev_pos[1], y=prev_pos[0])
+                        self.board.move(p.index, x=prev_pos[1], y=prev_pos[0], old_pos=(p.y, p.x))
                 elif enemy_type == "Trap":
                     # Lose a heart
                     p.health -= 1
@@ -704,7 +744,7 @@ class DiceAdventure:
 
                 # If player dies, remove from board
                 if p.health <= 0:
-
+                    self.board.remove(p.index, delete=False)
                     if self.track_metrics:
                         self.tracker.update(target="player", player=p.name, metric_name="death")
                     p.health = 0

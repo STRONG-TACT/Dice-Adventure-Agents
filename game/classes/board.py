@@ -190,7 +190,7 @@ class Board:
                 self.place(m, new_x, new_y, old_x=x, old_y=y)
                 break
 
-    def move(self, obj_index, action, x=None, y=None, old_pos=None, delete=False):
+    def move(self, obj_index, action=None, x=None, y=None, old_pos=None, delete=False):
         """
         Moves the given object according to the given action
         :param obj_index: The object to move
@@ -208,12 +208,12 @@ class Board:
         if x is None or y is None:
             x = self.objects[obj_index].x
             y = self.objects[obj_index].y
-            old_pos = (x, y)
+            old_pos = (y, x)
 
             x, y = self.update_location_by_direction(action, x, y)
 
-        if x != old_pos[0] or y != old_pos[1]:
-            self.place(obj_index, x, y, old_x=old_pos[0], old_y=old_pos[1], delete=delete)
+        if x != old_pos[1] or y != old_pos[0]:
+            self.place(obj_index, x, y, old_x=old_pos[1], old_y=old_pos[0], delete=delete)
 
     def place(self, obj_index, x, y, old_x=None, old_y=None, create=False, placed_by=None, delete=False):
         """
@@ -282,15 +282,15 @@ class Board:
     # GOAL TESTING #
     ################
 
-    def at(self, player, obj):
+    def at(self, player_index, obj_index):
         """
         Checks whether the given player and object are co-located
-        :param player: The player to check
-        :param obj: The object to check
+        :param player_index: The player to check
+        :param obj_index: The object to check
         :return: True/False
         """
-        return self.objects[player].x == self.objects[obj].x \
-            and self.objects[player].y == self.objects[obj].y
+        return self.objects[player_index].x == self.objects[obj_index].x \
+            and self.objects[player_index].y == self.objects[obj_index].y
 
     def print_board(self, render_verbose=False, level=None, phase=None):
         if render_verbose:
