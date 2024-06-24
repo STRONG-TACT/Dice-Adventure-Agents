@@ -1,5 +1,6 @@
+from collections import Counter
 from random import choice
-import json
+from random import seed
 
 
 class DiceAdventureAgent:
@@ -17,6 +18,11 @@ class DiceAdventureAgent:
         """
         self.character = character
         self.directions = ["up", "down", "left", "right"]
+        self.level = None
+        self.visited = set()
+        self.visited_counter = Counter()
+        self.task = None
+        self.tasks = ["shrine", "tower", "explore"]
 
     def take_action(self, state, actions):
         """
@@ -26,11 +32,14 @@ class DiceAdventureAgent:
         :param actions: (list) A list of string action names
         :return:        (string) An action from the 'actions' list
         """
-        # print(json.dumps(state, indent=2))
+        # seed(0)
         scene = state["content"]["scene"]
         player, shrine, tower = self.get_objects(scene)
-        # task = self.get_task(shrine, tower)
-        task = "shrine" if shrine["reached"] else "tower"
+
+        self.task = self.get_task(player, shrine, tower, scene)
+        target = None
+        if self.task not in self.tasks:
+            target = self.find_object(scene, self.task)
 
         # No pinning
         if state["content"]["gameData"]["currentPhase"] == "Player_Pinning":
@@ -40,16 +49,21 @@ class DiceAdventureAgent:
             # Player is dead, do nothing (return wait)
             if player["dead"]:
                 return "wait"
-            # print(player)
-            # print(task)
-            # print(self.directions)
+
             if player["actionPoints"] > 0:
 
-                if task == "shrine":
+                if self.task == "shrine":
                     return self.get_direction(player, shrine, state)
-                else:
+                elif self.task == "tower":
                     return self.get_direction(player, tower, state)
+                elif self.task == "explore":
+                    return self.get_direction(player, tower, state, explore=True)
+                else:
+                    return self.get_direction(player, target, state)
             else:
+                x, y = self.get_x_y_cursor(player["x"], player["y"], player["actionPlan"])
+                self.visited.add((y,x))
+                self.visited_counter[(y,x)] += 1
                 return "submit"
 
     def get_objects(self, scene):
@@ -57,8 +71,7 @@ class DiceAdventureAgent:
         shrine = None
         tower = None
         for obj in scene:
-            # TODO CHANGE BACK TO ENTITY TYPE WHEN THEY ARE IN STATE FOR CHARACTERS
-            if obj.get("name") == self.character:
+            if obj.get("entityType") == self.character:
                 player = obj
             elif obj.get("entityType") == "Shrine" and obj.get("character") == self.character:
                 shrine = obj
@@ -66,7 +79,13 @@ class DiceAdventureAgent:
                 tower = obj
         return player, shrine, tower
 
-    def get_direction(self, player, goal, state):
+    @staticmethod
+    def find_object(scene, obj_id):
+        for obj in scene:
+            if obj.get("id") == obj_id:
+                return obj
+
+    def get_direction(self, player, goal, state, explore=False):
         """
         If x distance is larger than y distance, move along x-axis otherwise move along y-axis. If there is a wall
         blocking the chosen direction, randomly chose another direction.
@@ -76,25 +95,34 @@ class DiceAdventureAgent:
         :return: (string) The directional action to take
         """
         x, y = self.get_x_y_cursor(player["x"], player["y"], player["actionPlan"])
-        print(f"PLAYER: {player['name']} | AT ({x},{y})")
 
-        if x == goal["x"] and y == goal["y"]:
-            action = "submit"
+        # Explore when no shrine or tower in state
+        if explore:
+            action = choice(self.directions)
         else:
-            if abs(x - goal["x"]) >= abs(y - goal["y"]):
-                action = "left" if goal["x"] < x else "right"
+            if x == goal["x"] and y == goal["y"]:
+                action = "submit"
             else:
-                action = "down" if goal["y"] < y else "up"
+                if abs(x - goal["x"]) >= abs(y - goal["y"]):
+                    action = "left" if goal["x"] < x else "right"
+                else:
+                    action = "down" if goal["y"] < y else "up"
 
-            directions = self.directions.copy()
-            walls = [obj for obj in state["content"]["scene"] if obj.get("entityType") == "Wall"]
-            while not self.check_valid_move(x, y, action, state, walls):
-                directions.remove(action)
-                action = choice(directions)
+        directions = self.directions.copy()
+        walls = [obj for obj in state["content"]["scene"] if obj.get("entityType") == "Wall"]
+        while not self.check_valid_move(x, y, action, state, walls, explore):
+            directions.remove(action)
+            # If all locations are exhausted, take random action and clear visited list
+            if not directions:
+                action = choice(self.directions)
+                self.visited = set()
+                self.visited_counter = Counter()
+                break
+            action = choice(directions)
 
         return action
 
-    def check_valid_move(self, x, y, action, state, walls):
+    def check_valid_move(self, x, y, action, state, walls, explore=False):
         """
         Checks if the action will result in a valid move. A move is invalid if the action puts the character
         out of bounds of the grid or on a wall.
@@ -107,9 +135,14 @@ class DiceAdventureAgent:
         """
         x, y = self.get_x_y_cursor(x, y, [action])
 
-        return 0 <= x < state["content"]["gameData"]["boardWidth"] and \
+        valid_move = 0 <= x < state["content"]["gameData"]["boardWidth"] and \
             0 <= y < state["content"]["gameData"]["boardHeight"] and \
             not any([w for w in walls if w["x"] == x and w["y"] == y])
+
+        if explore:
+            valid_move = valid_move and (y,x) not in self.visited
+
+        return valid_move
 
     @staticmethod
     def get_x_y_cursor(x, y, action_plan):
@@ -126,13 +159,16 @@ class DiceAdventureAgent:
                 pass
         return x, y
 
-
-    """
-        def get_task(self, shrine, tower):
+    def get_task(self, player, shrine, tower, scene):
         if shrine:
+            # If agent has visited same spot too many times, give it new target
+            if self.visited_counter[(player["y"], player["x"])] > 3 and self.task in self.tasks:
+                return choice([i.get("id") for i in scene if i.get("entityType") not in ["Wall", "Open"]])
+
             if not shrine["reached"]:
-                task = "shrine"
+                return "shrine"
             elif tower:
-                task = "tower"
-        return task
-    """
+                return "tower"
+
+        return "explore"
+
