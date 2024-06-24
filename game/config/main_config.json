@@ -6,7 +6,7 @@
 	  "VALID_PIN_TYPES": ["pinga", "pingb", "pingc", "pingd"],
 	  "VALID_MOVE_ACTIONS": ["left", "right", "up", "down", "wait", "submit"]
 	},
-	"COUNTDOWN_TIMER_SECONDS": 30,
+	"COUNTDOWN_TIMER_SECONDS": 120,
 	"METRICS": {
 	  "DIRECTORIES": {
 		"LOGFILES": "train/{}/metrics/gameplay/",
@@ -122,19 +122,19 @@
 		"NAME": "Shrine",
 		"TYPE": "Shrine",
 		"ENTITY_TYPE": "Shrine",
-		"CHARACTER": "Dwarf"
+		"CHARACTER": "C11"
 	  },
 	  "K2": {
 		"NAME": "Shrine",
 		"TYPE": "Shrine",
 		"ENTITY_TYPE": "Shrine",
-		"CHARACTER": "Giant"
+		"CHARACTER": "C21"
 	  },
 	  "K3": {
 		"NAME": "Shrine",
 		"TYPE": "Shrine",
 		"ENTITY_TYPE": "Shrine",
-		"CHARACTER": "Human"
+		"CHARACTER": "C31"
 	  },
 	  "M1": {
 		"NAME": "Monster",
@@ -270,6 +270,33 @@
   "GYM_ENVIRONMENT": {
 	"UNITY": {
 	  "URL": "ws://localhost:4649/hmt/{}"
+	},
+	"OBSERVATION": {
+	  "OBJECT_POSITIONS": {
+		"C1": {"NAME": "Dwarf", "POSITION": 0, "VALUE": 1},
+		"C2": {"NAME": "Giant", "POSITION": 1, "VALUE": 1},
+		"C3": {"NAME": "Human", "POSITION": 2, "VALUE": 1},
+		"K1": {"NAME": "Shrine", "POSITION": 3, "VALUE": 1},
+		"K2": {"NAME": "Shrine", "POSITION": 3, "VALUE": 2},
+		"K3": {"NAME": "Shrine", "POSITION": 3, "VALUE": 3},
+		"M1": {"NAME": "Monster", "POSITION": 4, "VALUE": 1},
+		"M2": {"NAME": "Monster", "POSITION": 4, "VALUE": 2},
+		"M3": {"NAME": "Monster", "POSITION": 4, "VALUE": 3},
+		"M4": {"NAME": "Monster", "POSITION": 4, "VALUE": 4},
+		"T1": {"NAME": "Trap", "POSITION": 5, "VALUE": 1},
+		"T2": {"NAME": "Trap", "POSITION": 5, "VALUE": 2},
+		"T3": {"NAME": "Trap", "POSITION": 5, "VALUE": 3},
+		"S1": {"NAME": "Stone", "POSITION": 6, "VALUE": 1},
+		"S2": {"NAME": "Stone", "POSITION": 6, "VALUE": 2},
+		"S3": {"NAME": "Stone", "POSITION": 6, "VALUE": 3},
+		"..": {"NAME": "Open", "POSITION": 7, "VALUE": 1},
+		"**": {"NAME": "Tower", "POSITION": 8, "VALUE": 1},
+		"##": {"NAME": "Wall", "POSITION": 9, "VALUE": 1},
+		"PA": {"NAME": "Pin", "POSITION": 10, "VALUE": 1},
+		"PB": {"NAME": "Pin", "POSITION": 10, "VALUE": 2},
+		"PC": {"NAME": "Pin", "POSITION": 10, "VALUE": 3},
+		"PD": {"NAME": "Pin", "POSITION": 10, "VALUE": 4}
+	  }
 	}
   }
 }

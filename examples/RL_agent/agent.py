@@ -1,4 +1,7 @@
-# PLEASE IMPORT ANY PACKAGES YOU NEED
+from random import seed
+from stable_baselines3 import PPO
+from nostalgia_dice_adventure_server.agent_submissions.RL_agent_defaultdice_adventure_python_env import DiceAdventurePythonEnvRL
+
 
 class DiceAdventureAgent:
     """
@@ -23,6 +26,9 @@ class DiceAdventureAgent:
         """
         self.character = character_name
         self.character_code = character_code
+        self.model_filename = "examples/RL_agent/dice_adventure_ppo_models/4/dice_adventure_ppo_modelchkpt-1.zip"
+        self.model = PPO.load(self.model_filename)
+        self.env = DiceAdventurePythonEnvRL(player=self.character)
 
     def take_action(self, state, actions):
         """
@@ -32,4 +38,11 @@ class DiceAdventureAgent:
         :param actions: (list) A list of string action names
         :return:        (string) An action from the 'actions' list
         """
-        raise NotImplementedError("Not implemented yet.")
+        seed(1)
+        action_map = {0: 'left', 1: 'right', 2: 'up', 3: 'down', 4: 'wait',
+                      5: 'submit', 6: 'pinga', 7: 'pingb', 8: 'pingc', 9: 'pingd', 10: 'undo'}
+        # action_map_rev = {v: k for k, v in action_map.items()}
+
+        obs = self.env.get_observation(state)
+        action, _states = self.model.predict(obs)
+        return action_map[int(action)]
