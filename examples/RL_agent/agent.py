@@ -26,7 +26,7 @@ class DiceAdventureAgent:
         """
         self.character = character_name
         self.character_code = character_code
-        self.model_filename = "examples/RL_agent/dice_adventure_ppo_models/4/dice_adventure_ppo_modelchkpt-1.zip"
+        self.model_filename = "path/to/model"
         self.model = PPO.load(self.model_filename)
         self.env = DiceAdventurePythonEnvRL(player=self.character)
 

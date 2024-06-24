@@ -1,0 +1,31 @@
+{
+  "ENV_SETTINGS": {
+	"server": "local",
+	"train_mode": true
+  },
+  "GAME_SETTINGS": {
+	"level": 1,
+	"level_sampling": true,
+	"limit_levels": [1, 2, 3, 4, 5],
+	"num_repeats": 1000,
+	"render": false,
+	"render_verbose": false,
+	"restart_on_finish": false,
+	"round_cap": 0,
+	"track_metrics": false
+  },
+    "TRAINING_SETTINGS": {
+	"GLOBAL": {
+	  "device": "cuda",
+	  "model_number": 1,
+	  "num_envs": 4,
+	  "num_time_steps": 100000000000,
+	  "players": ["Giant", "Human", "Dwarf"],
+	  "save_threshold": 50000
+	},
+	"PPO": {
+	  "batch_size": 64,
+	  "n_steps": 2048
+	}
+  }
+}
