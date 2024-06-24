@@ -1,6 +1,6 @@
 from random import seed
 from stable_baselines3 import PPO
-from nostalgia_dice_adventure_server.agent_submissions.RL_agent_defaultdice_adventure_python_env import DiceAdventurePythonEnvRL
+from examples.RL_agent.dice_adventure_python_env import DiceAdventurePythonEnvRL
 
 
 class DiceAdventureAgent:

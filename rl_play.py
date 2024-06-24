@@ -1,5 +1,5 @@
 from time import sleep
-from examples.RL_agent.dice_adventure_python_env import DiceAdventurePythonEnv
+from examples.RL_agent.dice_adventure_python_env import DiceAdventurePythonEnvRL
 from examples.RL_agent.agent import DiceAdventureAgent
 
 SERVER = "local"
@@ -7,7 +7,7 @@ SERVER = "local"
 
 def main():
     # Set up environment
-    env = DiceAdventurePythonEnv(server=SERVER, state_version="fow")
+    env = DiceAdventurePythonEnvRL(server=SERVER, state_version="fow")
     # Load agents
     players = env.get_player_names()
     agents = [DiceAdventureAgent(p, env.get_player_code(p)) for p in players]
