@@ -87,7 +87,6 @@ class DiceAdventure:
         #############
         self.render_game = render
         self.render_verbose = render_verbose
-
         ###################
         # METRIC TRACKING #
         ###################
@@ -193,7 +192,7 @@ class DiceAdventure:
                 "gameData": {
                     "boardWidth": len(self.curr_level[0]),
                     "boardHeight": len(self.curr_level),
-                    "level": self.curr_level_num,
+                    "currLevel": self.curr_level_num,
                     "currentPhase": self.phases[self.phase_num],
                     "timer": round(self.countdown_max_time - (time() - self.countdown_timer), 2)
                 },
@@ -228,6 +227,9 @@ class DiceAdventure:
             else:
                 for o in obj_dict:
                     obj = obj_dict[o]
+                    # Players are handled at the end of the function
+                    if isinstance(obj, Player):
+                        continue
 
                     ele = {"id": f"{obj.obj_code}{obj.index_num}",
                            "objKey": obj.obj_code,
@@ -235,35 +237,13 @@ class DiceAdventure:
                            "x": obj.x,
                            "y": obj.y}
 
-                    if isinstance(obj, Player):
-                        # Can return player data ONLY if in current sight range or if giving full state or data relates
-                        # to self
-                        if version == "full" or pos in sight_range or obj.obj_code == player_obj.obj_code:
-                            ele.update({
-                                "characterId": int(obj.obj_code[1]),
-                                "health": obj.health,
-                                "lives": obj.lives,
-                                "dead": obj.dead
-                            })
-                            # Only provide this information if state being provided is for given character or if giving
-                            # full state
-                            if obj.obj_code == player_obj.obj_code or version == "full":
-                                ele.update({
-                                    "pinCursorX": obj.pin_x,
-                                    "pinCursorY": obj.pin_y,
-                                    "sightRange": obj.sight_range,
-                                    "monsterDice": f"D{obj.dice_rolls['MONSTER']['VAL']}+{obj.dice_rolls['MONSTER']['CONST']}",
-                                    "trapDice": f"D{obj.dice_rolls['TRAP']['VAL']}+{obj.dice_rolls['TRAP']['CONST']}",
-                                    "stoneDice": f"D{obj.dice_rolls['STONE']['VAL']}+{obj.dice_rolls['STONE']['CONST']}",
-                                    "actionPoints": obj.action_points,
-                                    "actionPlan": obj.action_plan
-                                })
                     # Goals
-                    elif isinstance(obj, Shrine):
+                    if isinstance(obj, Shrine):
                         ele.update({
                             "reached": obj.reached,
                             "character": obj.player
                         })
+
                     elif isinstance(obj, Tower):
                         ele.update({
                             "subgoalCount": obj.subgoal_count
@@ -274,11 +254,11 @@ class DiceAdventure:
                         # returned even if not in sight range but have been seen before when 'version' is 'fow'
                         if version == "full" or obj.name != "Monster" or (obj.name == "Monster" and pos in sight_range):
                             ele.update({
-                                "combatDice": f"D{obj.dice_rolls['VAL']}+{obj.dice_rolls['CONST']}"
+                                "challengeDie": f"D{obj.dice_rolls['VAL']}+{obj.dice_rolls['CONST']}"
                             })
                             # Action points only apply to monsters
-                            if obj.name == "Monster":
-                                ele["actionPoints"] = self.config["OBJECT_INFO"]["OBJECT_CODES"][obj.obj_code]["ACTION_POINTS"]
+                            # if obj.name == "Monster":
+                            #    ele["actionPoints"] = self.config["OBJECT_INFO"]["OBJECT_CODES"][obj.obj_code]["ACTION_POINTS"]
                     # Pins
                     elif isinstance(obj, Pin):
                         ele.update({
@@ -299,8 +279,11 @@ class DiceAdventure:
             ele = {"id": f"{obj.obj_code}{obj.index_num}",
                    "objKey": obj.obj_code,
                    "entityType": obj.entity_type,
-                   "x": obj.x,
-                   "y": obj.y}
+                   "ready": obj.pin_finalized if self.phases[self.phase_num] == self.pinning_phase_name
+                   else (obj.action_plan_finalized if self.phases[self.phase_num] == self.planning_phase_name
+                         else True),
+                   "lives": obj.lives
+                   }
 
             # Can return player data ONLY if in current sight range or if giving full state or data relates
             # to self
@@ -308,8 +291,9 @@ class DiceAdventure:
                 ele.update({
                     "characterId": int(obj.obj_code[1]),
                     "health": obj.health,
-                    "lives": obj.lives,
-                    "dead": obj.dead
+                    "dead": obj.dead,
+                    "x": obj.x,
+                    "y": obj.y
                 })
                 # Only provide this information if state being provided is for given character or if giving
                 # full state
@@ -318,9 +302,9 @@ class DiceAdventure:
                         "pinCursorX": obj.pin_x,
                         "pinCursorY": obj.pin_y,
                         "sightRange": obj.sight_range,
-                        "monsterDice": f"D{obj.dice_rolls['MONSTER']['VAL']}+{obj.dice_rolls['MONSTER']['CONST']}",
-                        "trapDice": f"D{obj.dice_rolls['TRAP']['VAL']}+{obj.dice_rolls['TRAP']['CONST']}",
-                        "stoneDice": f"D{obj.dice_rolls['STONE']['VAL']}+{obj.dice_rolls['STONE']['CONST']}",
+                        "monsterDie": f"D{obj.dice_rolls['MONSTER']['VAL']}+{obj.dice_rolls['MONSTER']['CONST']}",
+                        "trapDie": f"D{obj.dice_rolls['TRAP']['VAL']}+{obj.dice_rolls['TRAP']['CONST']}",
+                        "stoneDie": f"D{obj.dice_rolls['STONE']['VAL']}+{obj.dice_rolls['STONE']['CONST']}",
                         "actionPoints": obj.action_points,
                         "actionPlan": obj.action_plan
                     })
@@ -511,8 +495,8 @@ class DiceAdventure:
                                                           if not self.board.objects[p].dead]):
             for p in self.player_code_mapping.values():
                 # Reset values
-                self.board.objects[p].pin_x = None
-                self.board.objects[p].pin_y = None
+                self.board.objects[p].pin_x = self.board.objects[p].x
+                self.board.objects[p].pin_y = self.board.objects[p].y
                 self.board.objects[p].pin_finalized = False
             # Change to action planning phase
             self.update_phase()
@@ -525,6 +509,7 @@ class DiceAdventure:
             # Reset action points
             for p in self.player_code_mapping.values():
                 self.board.objects[p].action_points = self.board.objects[p].max_action_points
+                self.board.objects[p].action_plan_finalized = False
 
             if self.execute_plans():
                 self.next_level()

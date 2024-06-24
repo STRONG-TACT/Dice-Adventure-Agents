@@ -191,6 +191,11 @@ class DiceAdventurePythonEnv(Env):
         return self.player_names
 
     @staticmethod
+    def get_player_code(player):
+        codes = {"Dwarf": "C1", "Giant": "C2", "Human": "C3"}
+        return codes[player]
+
+    @staticmethod
     def _get_reward():
         """
         Calculates the reward the agent should receive based on action taken.
