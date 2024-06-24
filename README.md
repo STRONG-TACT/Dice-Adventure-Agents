@@ -76,7 +76,7 @@ Please contact any of us if you have any questions or run into any issues!
 | Name       | Position    | Contact              | 
 |------------|-------------|----------------------|
 | Glen Smith | PhD Student | glensmith(at)gatech.edu |
-| Qiao Zhang | PhD Student | zq99(at)gatech.edu |
+| Qiao Zhang | PhD Student | qz99(at)gatech.edu |
 
 ### Versions
 | Tool/Software  | Version |
