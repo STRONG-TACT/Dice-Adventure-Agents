@@ -1,11 +1,11 @@
 from game.dice_adventure import DiceAdventure
-import game.unity_socket as unity_socket
+# import game.unity_socket as unity_socket
 from gymnasium import Env
 from gymnasium import spaces
 from json import loads
 import numpy as np
 from random import choice
-from game.unity_socket import DiceAdventureWebSocket
+# from game.unity_socket import DiceAdventureWebSocket
 
 
 class DiceAdventurePythonEnvRL(Env):
@@ -62,9 +62,12 @@ class DiceAdventurePythonEnvRL(Env):
         # this can be described both by Discrete and Box space
         self.mask_size = self.max_mask_radius * 2 + 1
         vector_len = self.mask_size * self.mask_size * self.num_game_objects
-        self.observation_space = spaces.Box(low=-5, high=100,
-                                            shape=(vector_len,), dtype=np.float32)
-        self.num_actions = 0
+        # self.observation_space = spaces.Box(low=-5, high=100,
+        #                                     # shape=(vector_len,),
+        #                                     shape=(self.mask_size, self.mask_size, self.num_game_objects+12),
+        #                                     dtype=np.float32)
+        self.observation_space = spaces.Box(low=0, high=255, shape=(self.mask_size, self.mask_size, self.num_game_objects+47), dtype=np.uint8)
+        #self.num_actions = 0
 
         ###################
         # SERVER SETTINGS #
@@ -105,7 +108,7 @@ class DiceAdventurePythonEnvRL(Env):
         Note: Although this framework is usually used for RL models, users can develop any kind of model with this code.
         """
         action = int(action)
-        self.num_actions += 1
+        # self.num_actions += 1
 
         state = self.get_state()
         # Execute action and get next state
@@ -142,6 +145,9 @@ class DiceAdventurePythonEnvRL(Env):
         :param state:
         :return:
         """
+        # from pprint import pprint
+        # pprint(state)
+
         player_obj = None
         for ele in state["content"]["scene"]:
             if ele.get("objKey") == self.get_player_code(self.player):
@@ -149,23 +155,81 @@ class DiceAdventurePythonEnvRL(Env):
                 break
 
         x, y = player_obj["x"], player_obj["y"]
+        width = state['content']['gameData']['boardWidth']
+        height = state['content']['gameData']['boardHeight']
+        shrine_reached = 0
 
-        x_bound_upper = x + self.local_mask_radius
-        x_bound_lower = x - self.local_mask_radius
-        y_bound_upper = y + self.local_mask_radius
-        y_bound_lower = y - self.local_mask_radius
+        x_bound_upper = x + self.max_mask_radius
+        x_bound_lower = x - self.max_mask_radius
+        y_bound_upper = y + self.max_mask_radius
+        y_bound_lower = y - self.max_mask_radius
 
-        tensor = np.zeros((self.mask_size, self.mask_size, self.num_game_objects))
+        tensor = np.zeros((self.mask_size, self.mask_size, self.num_game_objects+47))
         for obj in state["content"]["scene"]:
             if obj["objKey"] in self.object_positions and obj["x"] and obj["y"]:
                 if x_bound_lower <= obj["x"] <= x_bound_upper and \
                         y_bound_lower <= obj["y"] <= y_bound_upper:
-                    other_x = self.local_mask_radius - (x - obj["x"])
-                    other_y = self.local_mask_radius - (y - obj["y"])
+                    other_x = self.max_mask_radius - (x - obj["x"])
+                    other_y = self.max_mask_radius - (y - obj["y"])
                     tensor[other_x][other_y][self.object_positions[obj["objKey"]]["POSITION"]] = \
                         self.object_positions[obj["objKey"]]["VALUE"]
 
-        return np.ndarray.flatten(tensor)
+                    if obj['entityType'] == 'Shrine' and obj['character'] == player_obj['id'] and obj['reached']:
+                        shrine_reached = 1
+
+        if state['content']['gameData']['currentPhase'] == 'Player_Pinning':
+            tensor[:,:,-1] = 1 
+
+        tensor[:,:,-2] = player_obj['actionPoints'] 
+        tensor[:,:,-3] = player_obj['health'] 
+        tensor[:,:,-4] = player_obj['lives'] 
+        tensor[:,:,-5] = int(player_obj['monsterDie'].split("+")[0][1:])
+        tensor[:,:,-6] = int(player_obj['monsterDie'].split("+")[1])
+        tensor[:,:,-7] = int(player_obj['stoneDie'].split("+")[0][1:])
+        tensor[:,:,-8] = int(player_obj['stoneDie'].split("+")[1])
+        tensor[:,:,-9] = int(player_obj['trapDie'].split("+")[0][1:])
+        tensor[:,:,-10] = int(player_obj['trapDie'].split("+")[1])
+        tensor[self.max_mask_radius - self.local_mask_radius:self.max_mask_radius + self.local_mask_radius + 1,
+               self.max_mask_radius - self.local_mask_radius:self.max_mask_radius + self.local_mask_radius + 1, -11] = 1
+        tensor[:,:,-12] = 1
+        lower_x_edge = max(0, self.max_mask_radius - (x - 0))
+        upper_x_edge = min(self.mask_size, self.max_mask_radius - (x - width))
+        lower_y_edge = max(0, self.max_mask_radius - (y - 0))
+        upper_y_edge = min(self.mask_size, self.max_mask_radius - (y - height))
+        tensor[:,:,-12] = 1
+        tensor[lower_x_edge:upper_x_edge,lower_y_edge:upper_y_edge,-12] = 0
+
+        # action plan 0=empty, 1=left, 2=right, 3=up, 4=down
+        plan_to_val = {'left': 0, 'right': 1, 'up': 2, 'down': 3, 'wait': 4}
+
+        for i, v in enumerate(player_obj['actionPlan']):
+            if i > 5:
+                raise Exception("Action plan longer than 6 actions...")
+            tensor[:,:, -13-i*5-plan_to_val[v]] = 1
+
+        # pin cursor location
+        pin_x = self.max_mask_radius - (x - player_obj['pinCursorX'])
+        pin_y = self.max_mask_radius - (y - player_obj['pinCursorY'])
+        if pin_x >= self.mask_size:
+            tensor[self.mask_size-1, :, -43] = 1
+        if pin_x < 0:
+            tensor[0, :, -43] = 1
+        if pin_y >= self.mask_size:
+            tensor[:, self.mask_size-1, -43] = 1
+        if pin_y < 0:
+            tensor[:, 0, -43] = 1
+
+        if pin_x < self.mask_size and pin_y < self.mask_size and pin_x >= 0 and pin_y >= 0:
+            tensor[pin_x,pin_y, -43] = 1
+
+        # which character are you -44, -45, -46
+        tensor[:, :, -44-int(player_obj['objKey'][1:])+1] = 1
+
+        # is your shrine reached?
+        tensor[:, :, -47] = shrine_reached
+
+        return tensor
+        # return np.ndarray.flatten(tensor)
 
     def _step_play(self, action):
         """
@@ -275,7 +339,40 @@ class DiceAdventurePythonEnvRL(Env):
         """
         reward = 0
         if state["content"]["gameData"]["currLevel"] != next_state["content"]["gameData"]["currLevel"]:
-            reward = 100 * (10/self.num_actions)
+            reward += 50
+
+        player_obj_curr = None
+        for ele in state["content"]["scene"]:
+            if ele.get("objKey") == self.get_player_code(self.player):
+                player_obj_curr = ele
+                break
+
+        player_obj_next = None
+        for ele in state["content"]["scene"]:
+            if ele.get("objKey") == self.get_player_code(self.player):
+                player_obj_next = ele
+                break
+
+        shrine_reached_curr = 0
+        for obj in state["content"]["scene"]:
+            if obj['entityType'] == 'Shrine' and obj['character'] == player_obj_curr['id'] and obj['reached']:
+                shrine_reached_curr = 1
+                break
+
+        shrine_reached_next = 0
+        for obj in next_state["content"]["scene"]:
+            if obj['entityType'] == 'Shrine' and obj['character'] == player_obj_next['id'] and obj['reached']:
+                shrine_reached_next = 1
+                break
+
+        if shrine_reached_curr == 0 and shrine_reached_next == 1:
+            reward += 50
+
+        reward -= max(0, player_obj_curr['health'] - player_obj_next['health'])
+        reward -= 10 * max(0, player_obj_curr['lives'] - player_obj_next['lives'])
+
+        if reward != 0:
+            print(reward)
         return reward
 
     def _get_characters_from_state(self, state):

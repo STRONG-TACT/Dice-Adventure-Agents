@@ -9,6 +9,7 @@ from tqdm import tqdm
 from json import loads
 
 
+
 ############
 # TRAINING #
 ############
@@ -24,10 +25,11 @@ def train_ppo(config):
                          players=config["TRAINING_SETTINGS"]["GLOBAL"]["players"],
                          env_args=kwargs)
 
-    makedirs("examples/RL_agent/tensorboard_logs/", exist_ok=True)
+    # makedirs("examples/RL_agent/tensorboard_logs/", exist_ok=True)
     model = PPO("MlpPolicy",
+    # model = PPO("CnnPolicy",
                 vec_env,
-                verbose=0,
+                verbose=1,
                 tensorboard_log="tensorboard_logs/",
                 device=config["TRAINING_SETTINGS"]["GLOBAL"]["device"],
                 # Kwargs

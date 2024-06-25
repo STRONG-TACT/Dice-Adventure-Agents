@@ -19,7 +19,7 @@ def main():
             print(f"CHARACTER ({agent.character}) SUBMITTING ACTION: ({action})")
             env.execute_action(player=agent.character, game_action=action)
         env.render()
-        # sleep(1)
+        sleep(1)
 
 
 if __name__ == "__main__":
