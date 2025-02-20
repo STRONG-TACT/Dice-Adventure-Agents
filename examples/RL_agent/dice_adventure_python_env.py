@@ -6,6 +6,7 @@ from json import loads
 import numpy as np
 from random import choice
 from game.unity_socket import DiceAdventureWebSocket
+import json
 
 
 class DiceAdventurePythonEnvRL(Env):
@@ -64,6 +65,7 @@ class DiceAdventurePythonEnvRL(Env):
         vector_len = self.mask_size * self.mask_size * self.num_game_objects
         self.observation_space = spaces.Box(low=-5, high=100,
                                             shape=(vector_len,), dtype=np.float32)
+        
         self.num_actions = 0
 
         ###################
@@ -72,64 +74,65 @@ class DiceAdventurePythonEnvRL(Env):
         self.server = server
         self.unity_socket_url = self.config["GYM_ENVIRONMENT"]["UNITY"]["URL"]
         # self.websocket = DiceAdventureWebSocket(url=self.unity_socket_url.format(self.player.lower()))
-        self.game = DiceAdventure(**self.kwargs) if self.server == "local" else None
+        self.game = None
+        if self.server == "local":
+            try:
+                self.game = DiceAdventure(**self.kwargs)
+            except Exception as e:
+                print(f"Error initializing DiceAdventure: {e}")
+                raise
 
-    def step(self, action):
+        # Load observation config
+        with open("examples/RL_agent/observation_config.json", "r") as f:
+            self.obs_config = json.load(f)
+        
+        # Initialize observation space
+        shape = self.obs_config["TENSOR_SHAPE"] + [self.obs_config["NUM_CHANNELS"]]
+        self.observation_space = spaces.Box(low=-5, high=100,
+                                         shape=shape, dtype=np.float32)
+
+    def step(self, action) -> tuple:
         """
-        Applies the given action to the game.
-        If self.train_mode == True, passes action to _step_train() and returns new information for RL model.
-        If self.train_mode == False, simply returns state obtained after taking action.
-        :param action:  (string) The action produced by the agent
-        :return:        (dict, float, bool, bool, dict) or (dict)
+        :return: (observation, reward, terminated, truncated, info)
         """
         if self.train_mode:
             return self._step_train(action)
-        else:
-            return self._step_play(action)
+        # Wrap _step_play return in proper tuple format
+        state = self._step_play(action)
+        obs = self.get_observation(state)
+        return obs, 0.0, False, False, {}
 
     def _step_train(self, action):
-        """
-        Applies the given action to the game. Determines the next observation and reward,
-        whether the training should terminate, whether training should be truncated, and
-        additional info.
-        :param action:  (string) The action produced by the agent
-        :return:        (dict, float, bool, bool, dict) See below
+        try:
+            action = int(action)
+            self.num_actions += 1
 
-        new_obs (dict) - The resulting game state after applying 'action' to the game
-        reward (float) - The reward obtained from applying 'action' to the game. This must be defined by the user. A
-                         helper function _get_reward() has been provided for convenience.
-        terminated (bool) - Whether the game has terminated after applying 'action' to the game
-        truncated (bool) - (See https://farama.org/Gymnasium-Terminated-Truncated-Step-API)
-        info (dict) - Additional information that should be passed back to model
+            state = self.get_state()
+            game_action = self.action_map[action]
+            next_state = self.execute_action(self.player, game_action)
 
-        Note: Although this framework is usually used for RL models, users can develop any kind of model with this code.
-        """
-        action = int(action)
-        self.num_actions += 1
+            reward = self._get_reward(state, next_state)
 
-        state = self.get_state()
-        # Execute action and get next state
-        game_action = self.action_map[action]
-        next_state = self.execute_action(self.player, game_action)
+            # Simulate other players
+            other_players = [p for p in self.player_names if p != self.player]
+            for op in other_players:
+                next_state = self.execute_action(player=op, game_action=choice(self.actions))
 
-        reward = self._get_reward(state, next_state)
+            terminated = next_state.get("status") == "GAME_OVER"
+            truncated = False
+            
+            if terminated:
+                new_obs, info = self.reset()
+            else:
+                new_obs = self.get_observation(next_state)
+                info = {}
 
-        # Simulate other players
-        other_players = [p for p in self.player_names if p != self.player]
-        for op in other_players:
-            next_state = self.execute_action(player=op, game_action=choice(self.actions))
-
-        terminated = next_state["status"] == "GAME_OVER"
-        if terminated:
-            new_obs, info = self.reset()
-        else:
-            new_obs = self.get_observation(next_state)
-            info = {}
-        truncated = False
-        # Track metrics
-        # self.save_metrics()
-        # self.render()
-        return new_obs, reward, terminated, truncated, info
+            return new_obs, reward, terminated, truncated, info
+        except Exception as e:
+            print(f"Error in _step_train: {e}")
+            # Return safe default values
+            zero_obs = np.zeros(self.observation_space.shape[0], dtype=np.float32)
+            return zero_obs, 0, True, False, {}
 
     def get_observation(self, state):
         """
@@ -142,38 +145,63 @@ class DiceAdventurePythonEnvRL(Env):
         :param state:
         :return:
         """
-        player_obj = None
-        for ele in state["content"]["scene"]:
-            if ele.get("objKey") == self.get_player_code(self.player):
-                player_obj = ele
-                break
+        try:
+            # Initialize observation shape at class level
+            if not hasattr(self, '_observation_shape'):
+                self._observation_shape = self.mask_size * self.mask_size * self.num_game_objects
+            
+            if state is None:
+                return np.zeros(self._observation_shape, dtype=np.float32)
+            
+            # Find player object safely
+            player_obj = None
+            for ele in state["content"]["scene"]:
+                if ele.get("objKey") == self.get_player_code(self.player):
+                    player_obj = ele
+                    break
+                
+            if player_obj is None:
+                raise ValueError("Player object not found in scene")
 
-        x, y = player_obj["x"], player_obj["y"]
+            x, y = player_obj["x"], player_obj["y"]
 
-        x_bound_upper = x + self.local_mask_radius
-        x_bound_lower = x - self.local_mask_radius
-        y_bound_upper = y + self.local_mask_radius
-        y_bound_lower = y - self.local_mask_radius
+            x_bound_upper = x + self.local_mask_radius
+            x_bound_lower = x - self.local_mask_radius
+            y_bound_upper = y + self.local_mask_radius
+            y_bound_lower = y - self.local_mask_radius
 
-        tensor = np.zeros((self.mask_size, self.mask_size, self.num_game_objects))
-        for obj in state["content"]["scene"]:
-            if obj["objKey"] in self.object_positions and obj["x"] and obj["y"]:
-                if x_bound_lower <= obj["x"] <= x_bound_upper and \
-                        y_bound_lower <= obj["y"] <= y_bound_upper:
-                    other_x = self.local_mask_radius - (x - obj["x"])
-                    other_y = self.local_mask_radius - (y - obj["y"])
-                    tensor[other_x][other_y][self.object_positions[obj["objKey"]]["POSITION"]] = \
-                        self.object_positions[obj["objKey"]]["VALUE"]
+            # Create observation tensor with error checking
+            tensor = np.zeros((self.mask_size, self.mask_size, self.num_game_objects), dtype=np.float32)
+            
+            for obj in state["content"]["scene"]:
+                if obj.get("objKey") in self.object_positions and \
+                   obj.get("x") is not None and obj.get("y") is not None:
+                    
+                    if x_bound_lower <= obj["x"] <= x_bound_upper and \
+                       y_bound_lower <= obj["y"] <= y_bound_upper:
+                        other_x = self.local_mask_radius - (x - obj["x"])
+                        other_y = self.local_mask_radius - (y - obj["y"])
+                        
+                        # Add bounds checking
+                        if 0 <= other_x < self.mask_size and 0 <= other_y < self.mask_size:
+                            # TODO: check if this is correct - if we have multiple monsters in sight range,
+                            # wouldn't this overwrite the first one?
+                            pos = self.object_positions[obj["objKey"]]["POSITION"]
+                            if pos < self.num_game_objects:
+                                tensor[other_x][other_y][pos] = \
+                                    self.object_positions[obj["objKey"]]["VALUE"]
 
-        return np.ndarray.flatten(tensor)
+            return np.ndarray.flatten(tensor)
+        except Exception as e:
+            print(f"Error creating observation: {e}")
+            return np.zeros(self._observation_shape, dtype=np.float32)
 
-    def _step_play(self, action):
-        """
-        Applies the given action to the game and returns the resulting state
-        :param action:  (string) The action produced by the agent
-        :return:        (dict) The resulting state
-        """
-        return self.execute_action(self.player, action)
+    def _step_play(self, action) -> dict:
+        """Returns state dictionary"""
+        state = self.execute_action(self.player, action)
+        if state is None:
+            return {"status": "ERROR", "content": {"scene": [], "gameData": {"currLevel": 0}}}
+        return state
 
     def close(self):
         """
@@ -183,79 +211,54 @@ class DiceAdventurePythonEnvRL(Env):
         pass
 
     def render(self, mode='console'):
-        """
-        Prints the current board state of the game. Only applies when `self.server` is 'local'.
-        :param mode: (string) Determines the mode to use (not used)
-        :return: N/A
-        """
-        if self.server == "local":
+        if self.server == "local" and self.game is not None:
             self.game.render()
 
     def reset(self, **kwargs):
-        """
-        Resets the game. Only applies when `self.server` is 'local'.
-        :param kwargs:  (dict) Additional arguments to pass into local game server
-        :return:        (dict, dict) The initial state when the game is reset, An empty 'info' dict
-        """
         if self.server == "local":
-            self.game = DiceAdventure(**self.kwargs)
+            try:
+                self.game = DiceAdventure(**self.kwargs)
+            except Exception as e:
+                print(f"Error resetting game: {e}")
+                raise
         obs = self.get_state()
         return self.get_observation(obs), {}
 
     def execute_action(self, player, game_action):
-        """
-        Executes the given action for the given player.
-        :param player:      (string) The player that should take the action
-        :param game_action: (string) The action to take
-        :return:            (dict) The resulting state after taking the given action
-        """
         if self.server == "local":
+            if self.game is None:
+                raise RuntimeError("Game not initialized")
             self.game.execute_action(player, game_action)
-            next_state = self.get_state()
+            return self.get_state()
         else:
             url = self.unity_socket_url.format(player.lower())
-            # TODO CAPTURE RESPONSE AND RETURN TO USER
-            unity_socket.execute_action(url, game_action)
-            next_state = self.get_state()
-        return next_state
+            try:
+                # Type checking for unity socket methods
+                if not hasattr(unity_socket, 'execute_action') or not hasattr(unity_socket, 'get_state'):
+                    raise AttributeError("Unity socket missing required methods")
+                unity_socket.execute_action(url, game_action)  # type: ignore
+                return unity_socket.get_state(url, self.state_version)  # type: ignore
+            except Exception as e:
+                print(f"Unity socket error: {e}")
+                return {"status": "ERROR", "content": {"scene": [], "gameData": {"currLevel": 0}}}
 
     def get_state(self, player=None, version=None, server=None):
-        """
-        Gets the current state of the game.
-        :param player: (string) The player whose perspective will be used to collect the state. Can be one of
-                                {Dwarf, Giant, Human}.
-        :param version: (string) The level of visibility. Can be one of {full, player, fow}
-        :param server: (string) Determines whether to get state from Python version or Unity version of game. Can be
-                                one of {local, unity}.
-        :return: (dict) The state of the game
-
-        The state is always given from the perspective of a player and defines how much of the level the
-        player can currently "see". The following state version options define how much information this function
-        returns.
-        - [full]:   Returns all objects and player stats for current level. This ignores the 'player' parameter.
-
-        - [player]: Returns all objects in the current sight range of the player. Limited information is provided about
-                    other players present in the state.
-
-        - [fow]:    Stands for Fog of War. In the Unity version of the game, you can see a visibility mask for each
-                    character. Black positions have not been observed. Gray positions have been observed but are not
-                    currently in the player's view. This option returns all objects in the current sight range (view) of
-                    the player plus objects in positions that the player has seen before. Note that any object that can
-                    move (such as monsters and other players) are only returned when they are in the player's current
-                    view, but static objects such as walls, stones, and traps are returned if they've been previously
-                    observed.
-        """
         version = version if version is not None else self.state_version
         player = player if player is not None else self.player
         server = server if server else self.server
 
-        if server == "local":
-            state = self.game.get_state(player, version)
-        else:
-            url = self.unity_socket_url.format(player.lower())
-            state = unity_socket.get_state(url, version)
-
-        return state
+        try:
+            if server == "local":
+                if self.game is None:
+                    raise RuntimeError("Game not initialized")
+                return self.game.get_state(player, version)
+            else:
+                url = self.unity_socket_url.format(player.lower())
+                return unity_socket.get_state(url, version)
+        except Exception as e:
+            print(f"Error getting state: {e}")
+            # Return a minimal valid state
+            return {"status": "ERROR", "content": {"scene": [], "gameData": {"currLevel": 0}}}
 
     def get_actions(self):
         return self.actions

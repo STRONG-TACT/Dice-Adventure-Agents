@@ -1,0 +1,45 @@
+{
+    "PIN_VALUES": {
+        "PINGA": 1,
+        "PINGB": 2,
+        "PINGC": 3,
+        "PINGD": 4
+    },
+    "CHANNEL_MAPPING": {
+        "BOARD_BOUNDARY": 0,
+        "DWARF_CHANNEL": 1,
+        "GIANT_CHANNEL": 2,
+        "HUMAN_CHANNEL": 3,
+        
+        "DWARF_SHRINE": 4,
+        "GIANT_SHRINE": 5,
+        "HUMAN_SHRINE": 6,
+        
+        "MONSTER_DICE": 7,
+        "TRAPS": 8,
+        "ROCKS": 9,
+        
+        "HEALTH_STATUS": 10,
+        "ACTION_POINTS": 11,
+        
+        "ACTION_1": 12,
+        "ACTION_2": 13,
+        "ACTION_3": 14,
+        "ACTION_4": 15,
+        "ACTION_5": 16,
+        "ACTION_6": 17,
+        
+        "DWARF_PINS": 18,
+        "GIANT_PINS": 19,
+        "HUMAN_PINS": 20,
+        
+        "GAME_PHASE": 21,
+        "PIN_CURSOR": 22,
+        
+        "MONSTER_SKILL": 23,
+        "TRAP_SKILL": 24,
+        "ROCK_SKILL": 25
+    },
+    "NUM_CHANNELS": 26,
+    "TENSOR_SHAPE": [20, 20]
+} 
