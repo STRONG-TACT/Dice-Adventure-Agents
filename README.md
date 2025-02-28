@@ -18,11 +18,14 @@ of the project. DA was designed to explore paradigms in HMT.
 
 You can find a complete game documentation on the [competition portal](https://strong-tact.github.io/).
 
-## How to use code
-Although Dice Adventure (DA) was implemented in Unity and your agents will ultimately interface with the Unity version, 
-this repository also implements a local, Python version of DA that users can use to develop agents. We developed the local
-version as a way to train RL agents that required near clock-time feedback for millions of time steps. Please follow
-these steps to set up your environment to use both the local and Unity versions of the game.
+## Code Overview
+This repository provides five main files for you to develop and submit your agents. You can find these in the `agent_template/` and `game/` folders: 
+
+- `agent.py`: A `DiceAdventureAgent` template class that you will use to implement your agent;
+- `dice_adventure_gym_env.py`: An OpenAI Gym interface that lets you connect to the Dice Adventure Unity game and develop RL agents or other agent types;
+- `submission_info.json`: A submission JSON file that requests basic information about your submission;
+- ``: A Windows local build of Dice Adventure; and
+- ``: A Mac local build of Dice Adventure
 
 *Note: We tested this code in Python 3.9.0. Please see the end of this README for full list of software versions.*
 
@@ -35,17 +38,18 @@ project. If you encounter errors installing any of these versions, please [reach
   pip install -r requirements.txt
 ```
 
+*Note: Not all packages may be necessary.*
+
 ### Run the sample code
 In the `examples/random_agent/` folder, there is a sample agent that plays as all three characters in the game and simply 
-takes random actions. By default, it uses the Unity server to play (for which you will need the Unity version of the game
-running), but you can change this at the top of the `play_game.py` file. If you use the local server, you'll need to add 
-`env.render()` in the while loop to see the 2D grid environment.
+takes random actions. 
 
 ```sh
   python play_game.py
 ```
 
-The sample code is commented and can be used as a reference structure for training/testing agents.
+The sample code is commented and can be used as a reference structure for training/testing agents. 
+
 ### Develop your agents
 We provide template code in the `agent_template/` folder. You should implement your agents within the `DiceAdventureAgent`
 class provided in the `agent.py` file. This allows us to maintain a common API interface for all submitted agents.
@@ -75,7 +79,6 @@ Please contact any of us if you have any questions or run into any issues!
 
 | Name       | Position    | Contact              | 
 |------------|-------------|----------------------|
-| Glen Smith | PhD Student | glensmith(at)gatech.edu |
 | Qiao Zhang | PhD Student | qz99(at)gatech.edu |
 
 ### Versions
