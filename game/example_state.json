@@ -1,0 +1,399 @@
+[
+  {
+    "id": "gameData",
+    "boardWidth": 9,
+    "boardHeight": 9,
+    "currLevel": 1,
+    "currentPhase": "Player_Pinning",
+    "timer": "118.0593"
+  },
+  {
+    "entityType": "Character",
+    "objKey": "C1",
+    "id": "C11",
+    "sightRange": 1,
+    "monsterDie": "D6+0",
+    "trapDie": "D8+0",
+    "stoneDie": "D4+0",
+    "ready": false,
+    "dead": false,
+    "lives": 3,
+    "health": 3,
+    "respawnCounter": 0,
+    "actionPoints": 6,
+    "actionPlan": [],
+    "pinCursorX": 2,
+    "pinCursorY": 8,
+    "grid_status": "visible",
+    "x": 2,
+    "y": 8
+  },
+  {
+    "entityType": "Character",
+    "objKey": "C2",
+    "id": "C21",
+    "sightRange": 3,
+    "monsterDie": "D6+0",
+    "trapDie": "D4+0",
+    "stoneDie": "D8+0",
+    "ready": false,
+    "dead": false,
+    "lives": 3,
+    "health": 3,
+    "respawnCounter": 0,
+    "actionPoints": 4,
+    "actionPlan": [],
+    "pinCursorX": 3,
+    "pinCursorY": 8,
+    "grid_status": "visible",
+    "x": 3,
+    "y": 8
+  },
+  {
+    "entityType": "Character",
+    "objKey": "C3",
+    "id": "C31",
+    "sightRange": 2,
+    "monsterDie": "D8+0",
+    "trapDie": "D6+0",
+    "stoneDie": "D6+0",
+    "ready": false,
+    "dead": false,
+    "lives": 3,
+    "health": 3,
+    "respawnCounter": 0,
+    "actionPoints": 5,
+    "actionPlan": [],
+    "pinCursorX": 4,
+    "pinCursorY": 4,
+    "grid_status": "hidden",
+    "x": 4,
+    "y": 4
+  },
+  {
+    "entityType": "Shrine",
+    "objKey": "3G",
+    "id": "3G1",
+    "character": "C31",
+    "reached": false,
+    "grid_status": "hidden",
+    "x": 0,
+    "y": 7
+  },
+  {
+    "entityType": "Shrine",
+    "objKey": "2G",
+    "id": "2G1",
+    "character": "C21",
+    "reached": false,
+    "grid_status": "hidden",
+    "x": 6,
+    "y": 0
+  },
+  {
+    "entityType": "Shrine",
+    "objKey": "1G",
+    "id": "1G1",
+    "character": "C11",
+    "reached": false,
+    "grid_status": "hidden",
+    "x": 8,
+    "y": 7
+  },
+  {
+    "id": "UE-41",
+    "entityType"": "Cell",
+    "objKey": "UE",
+    "grid_status": "unexplored",
+    "x": 7,
+    "y": 8},
+  {
+    "entityType": "Wall",
+    "objKey": "##",
+    "id": "##16",
+    "x": 0,
+    "y": 1
+  },
+  {
+    "entityType": "Wall",
+    "objKey": "##",
+    "id": "##9",
+    "x": 0,
+    "y": 3
+  },
+  {
+    "entityType": "Wall",
+    "objKey": "##",
+    "id": "##6",
+    "x": 0,
+    "y": 6
+  },
+  {
+    "entityType": "Open",
+    "objKey": "..",
+    "id": "..7",
+    "x": 0,
+    "y": 7
+  },
+  {
+    "entityType": "Wall",
+    "objKey": "##",
+    "id": "##1",
+    "x": 0,
+    "y": 8
+  },
+  {
+    "entityType": "Wall",
+    "objKey": "##",
+    "id": "##17",
+    "x": 1,
+    "y": 1
+  },
+  {
+    "entityType": "Wall",
+    "objKey": "##",
+    "id": "##13",
+    "x": 1,
+    "y": 2
+  },
+  {
+    "entityType": "Rock",
+    "objKey": "S1",
+    "id": "S12",
+    "x": 1,
+    "y": 3,
+    "challengeDie": "D0+5"
+  },
+  {
+    "entityType": "monster",
+    "objKey": "M2",
+    "id": "M23",
+    "challengeDie": "D6+0",
+    "x": 1,
+    "y": 4
+  },
+  {
+    "entityType": "Trap",
+    "objKey": "T1",
+    "id": "T11",
+    "x": 1,
+    "y": 7,
+    "challengeDie": "D4+0"
+  },
+  {
+    "entityType": "Wall",
+    "objKey": "##",
+    "id": "##10",
+    "x": 2,
+    "y": 3
+  },
+  {
+    "entityType": "monster",
+    "objKey": "M1",
+    "id": "M12",
+    "challengeDie": "D4+0",
+    "x": 2,
+    "y": 6
+  },
+
+  {
+    "entityType": "monster",
+    "objKey": "M1",
+    "id": "M14",
+    "challengeDie": "D4+0",
+    "x": 3,
+    "y": 0
+  },
+  {
+    "entityType": "Rock",
+    "objKey": "S1",
+    "id": "S13",
+    "x": 3,
+    "y": 2,
+    "challengeDie": "D0+5"
+  },
+  {
+    "entityType": "monster",
+    "objKey": "M2",
+    "id": "M22",
+    "challengeDie": "D6+0",
+    "x": 3,
+    "y": 5
+  },
+  {
+    "entityType": "monster",
+    "objKey": "M2",
+    "id": "M21",
+    "challengeDie": "D6+0",
+    "x": 3,
+    "y": 7
+  },
+  {
+    "entityType": "Wall",
+    "objKey": "##",
+    "id": "##18",
+    "x": 4,
+    "y": 1
+  },
+  {
+    "entityType": "Wall",
+    "objKey": "##",
+    "id": "##4",
+    "x": 4,
+    "y": 7
+  },
+  {
+    "entityType": "Wall",
+    "objKey": "##",
+    "id": "##2",
+    "x": 4,
+    "y": 8
+  },
+  {
+    "entityType": "Wall",
+    "objKey": "##",
+    "id": "##19",
+    "x": 5,
+    "y": 1
+  },
+  {
+    "entityType": "Trap",
+    "objKey": "T1",
+    "id": "T13",
+    "x": 5,
+    "y": 2,
+    "challengeDie": "D4+0"
+  },
+  {
+    "entityType": "monster",
+    "objKey": "M1",
+    "id": "M13",
+    "challengeDie": "D4+0",
+    "x": 5,
+    "y": 3
+  },
+  {
+    "entityType": "Wall",
+    "objKey": "##",
+    "id": "##5",
+    "x": 5,
+    "y": 7
+  },
+  {
+    "entityType": "Open",
+    "objKey": "..",
+    "id": "..52",
+    "x": 6,
+    "y": 0
+  },
+  {
+    "entityType": "Wall",
+    "objKey": "##",
+    "id": "##14",
+    "x": 6,
+    "y": 2
+  },
+  {
+    "entityType": "Wall",
+    "objKey": "##",
+    "id": "##11",
+    "x": 6,
+    "y": 3
+  },
+  {
+    "entityType": "Trap",
+    "objKey": "T1",
+    "id": "T12",
+    "x": 6,
+    "y": 5,
+    "challengeDie": "D4+0"
+  },
+  {
+    "entityType": "monster",
+    "objKey": "M1",
+    "id": "M11",
+    "challengeDie": "D4+0",
+    "x": 6,
+    "y": 7
+  },
+  {
+    "entityType": "monster",
+    "objKey": "M2",
+    "id": "M24",
+    "challengeDie": "D6+0",
+    "x": 7,
+    "y": 1
+  },
+  {
+    "entityType": "Goal",
+    "objKey": "**",
+    "subGoalCount": 0,
+    "id": "**1",
+    "x": 7,
+    "y": 4
+  },
+  {
+    "entityType": "Rock",
+    "objKey": "S1",
+    "id": "S11",
+    "x": 7,
+    "y": 6,
+    "challengeDie": "D0+5"
+  },
+  {
+    "entityType": "Wall",
+    "objKey": "##",
+    "id": "##21",
+    "x": 8,
+    "y": 0
+  },
+  {
+    "entityType": "Wall",
+    "objKey": "##",
+    "id": "##20",
+    "x": 8,
+    "y": 1
+  },
+  {
+    "entityType": "Wall",
+    "objKey": "##",
+    "id": "##15",
+    "x": 8,
+    "y": 2
+  },
+  {
+    "entityType": "Wall",
+    "objKey": "##",
+    "id": "##12",
+    "x": 8,
+    "y": 3
+  },
+  {
+    "entityType": "Wall",
+    "objKey": "##",
+    "id": "##8",
+    "x": 8,
+    "y": 4
+  },
+  {
+    "entityType": "Wall",
+    "objKey": "##",
+    "id": "##7",
+    "x": 8,
+    "y": 6
+  },
+  {
+    "entityType": "Open",
+    "objKey": "..",
+    "id": "..12",
+    "x": 8,
+    "y": 7
+  },
+  {
+    "entityType": "Wall",
+    "objKey": "##",
+    "id": "##3",
+    "x": 8,
+    "y": 8
+  }
+]
