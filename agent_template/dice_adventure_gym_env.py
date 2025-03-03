@@ -1,4 +1,5 @@
 from json import loads
+from time import sleep
 from typing import Any, Tuple, Union, Dict
 from gymnasium import Env
 from game.unity_socket import UnityWebSocket
@@ -19,6 +20,9 @@ class DiceAdventureGymEnv(Env):
                             the next state.
         :param game_executable_filepath:  The location of the game executable
         """
+        self._launch_game(game_executable_filepath)
+        sleep(5)
+        
         self.player = player
         self.port = port
         self.train_mode = train_mode
@@ -28,7 +32,7 @@ class DiceAdventureGymEnv(Env):
         self.actions = ["up", "down", "left", "right", "wait", "undo", "submit", "pinga", "pingb", "pingc", "pingd"]
         self.player_names = ["dwarf", "giant", "human"]
 
-        self._launch_game(game_executable_filepath)
+        
 
     def step(self, action):
         """
