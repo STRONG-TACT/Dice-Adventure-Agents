@@ -215,13 +215,13 @@ def _find_player_obj(scene: list[dict], player: str) -> [dict, None]:
     :param player: The name of the player to be returned
     :return: The player dictionary object
     """
-    pid = _get_player_id(player)
+    pid = get_player_id(player)
     for obj in scene:
         if obj.get('id') == pid:
             return copy(obj)
 
 
-def _get_player_id(player: str) -> str:
+def get_player_id(player: str) -> str:
     """
     Gets the player ID.
     :param player: The player whose ID will be returned
