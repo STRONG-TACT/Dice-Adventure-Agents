@@ -1,5 +1,5 @@
 from time import sleep
-from examples.random_agent.dice_adventure_gym_env import DiceAdventurePythonEnv
+from examples.random_agent.dice_adventure_gym_env import DiceAdventureGymEnv
 from examples.random_agent.agent import DiceAdventureAgent
 
 
