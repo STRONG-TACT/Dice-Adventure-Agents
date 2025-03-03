@@ -5,17 +5,18 @@ from examples.random_agent.agent import DiceAdventureAgent
 
 
 def main():
-    players = ['dwarf', 'giant', 'human']
-    # Set up environments
-    envs = [DiceAdventurePythonEnv(player=p, port='4649') for p in players]
-    # Create agents
-    agents = [DiceAdventureAgent(p, get_player_id(player=p, port='4649')) for i, p in enumerate(players)]
+    # Set up environment
+    env = DiceAdventurePythonEnv(port='4649', train_mode=False)
+    # Load agents
+    players = env.get_player_names()
+    agents = [DiceAdventureAgent(p, get_player_id(player=p)) for p in players]
 
     while True:
         for i in range(len(agents)):
-            state = envs[i].get_state()
-            action = agents[i].take_action(state=state, actions=env.get_actions())
-            envs[i].execute_action(game_action=action)
+            state = env.get_state(players[i])
+            action = agent.take_action(state=state, actions=env.get_actions())
+            env.execute_action(game_action=action)
+        env.render()
         sleep(.1)
 
 
