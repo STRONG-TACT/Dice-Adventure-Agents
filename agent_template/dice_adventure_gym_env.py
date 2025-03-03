@@ -8,7 +8,7 @@ class DiceAdventureGymEnv(Env):
     """
     Implements a custom gym environment for the Dice Adventure Unity game.
     """
-    def __init__(self, player: str, port: str, train_mode: True, game_executable_filepath: str):
+    def __init__(self, port: str, train_mode: True, game_executable_filepath: str):
         """
         Init function for Dice Adventure gym environment.
         :param player:      The player that will be used to play the game.
@@ -22,8 +22,8 @@ class DiceAdventureGymEnv(Env):
         self.player = player
         self.port = port
         self.train_mode = train_mode
-        self.socket_url = "ws://localhost:{}/hmt/{}".format(self.port, self.player)
-        self.unity_socket = UnityWebSocket(self.socket_url)
+        self.socket_url = "ws://localhost:{}/hmt/{}"
+        self.sockets = {'dwarf': None, 'giant': None, 'human': None}
 
         self.actions = ["up", "down", "left", "right", "wait", "undo", "submit", "pinga", "pingb", "pingc", "pingd"]
         self.player_names = ["dwarf", "giant", "human"]
@@ -105,17 +105,17 @@ class DiceAdventureGymEnv(Env):
         """
         pass
 
-    def execute_action(self, game_action: str):
+    def execute_action(self, player: str, game_action: str):
         """
         Executes the given action for the given player.
         :param game_action: The action to take
         :return:            The resulting state after taking the given action
         """
         # TODO CAPTURE RESPONSE AND RETURN TO USER
-        self.unity_socket.execute_action(game_action)
-        return self.get_state()
+        self._get_socket(player).execute_action(game_action)
+        return self.get_state(player)
 
-    def get_state(self):
+    def get_state(self, player: str):
         """
         Gets the current state of the game.
 
@@ -131,7 +131,12 @@ class DiceAdventureGymEnv(Env):
             view (i.e. not obscured by black or gray squares), but static objects such as walls, stones, and traps,
             and shrines are returned if they've been previously observed.
         """
-        return _simplify_state(self.unity_socket.get_state(), self.player)
+        return _simplify_state(self._get_socket(player).get_state(), self.player)
+    
+    def _get_socket(self, player):
+        if self.sockets[player] is None:
+            self.sockets[player] = UnityWebSocket(self.socket_url.format(self.port, player))
+        return self.sockets[player]
 
     def get_actions(self):
         return self.actions
