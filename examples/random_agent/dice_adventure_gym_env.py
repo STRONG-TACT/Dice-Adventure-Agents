@@ -4,11 +4,11 @@ from gymnasium import Env
 from game.unity_socket import UnityWebSocket
 
 
-class DiceAdventurePythonEnv(Env):
+class DiceAdventureGymEnv(Env):
     """
     Implements a custom gym environment for the Dice Adventure Unity game.
     """
-    def __init__(self, player: str, port: str, train_mode: True):
+    def __init__(self, player: str, port: str, train_mode: True, game_executable_filepath: str):
         """
         Init function for Dice Adventure gym environment.
         :param player:      The player that will be used to play the game.
@@ -17,6 +17,7 @@ class DiceAdventurePythonEnv(Env):
         :param train_mode:  A helper parameter to switch between training mode and play mode. When you test agents,
                             you can set train_mode = False so that the step function simply takes an action and returns
                             the next state.
+        :param game_executable_filepath:  The location of the game executable
         """
         self.player = player
         self.port = port
@@ -26,6 +27,8 @@ class DiceAdventurePythonEnv(Env):
 
         self.actions = ["up", "down", "left", "right", "wait", "undo", "submit", "pinga", "pingb", "pingc", "pingd"]
         self.player_names = ["dwarf", "giant", "human"]
+
+        self._launch_game(game_executable_filepath)
 
     def step(self, action):
         """
@@ -144,6 +147,14 @@ class DiceAdventurePythonEnv(Env):
         """
         return 0
 
+    def _launch_game(self, game_executable_filepath):
+        command = [game_executable_filepath,
+                   "-localMode",
+                   "-hmtsocketurl", "ws://localhost",
+                   "-hmtsocketport", "{}".format(self.port)]
+        # subprocess.run(command)
+        subprocess.run(command, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+
 
 #############
 # UTILITIES #
@@ -204,13 +215,13 @@ def _find_player_obj(scene: list[dict], player: str) -> [dict, None]:
     :param player: The name of the player to be returned
     :return: The player dictionary object
     """
-    pid = _get_player_id(player)
+    pid = get_player_id(player)
     for obj in scene:
         if obj.get('id') == pid:
             return copy(obj)
 
 
-def _get_player_id(player: str) -> str:
+def get_player_id(player: str) -> str:
     """
     Gets the player ID.
     :param player: The player whose ID will be returned
