@@ -1,7 +1,7 @@
 from json import loads
 from typing import Any, Tuple, Union, Dict
 from gymnasium import Env
-from gane.unity_socket import UnityWebSocket
+from game.unity_socket import UnityWebSocket
 
 
 class DiceAdventurePythonEnv(Env):
