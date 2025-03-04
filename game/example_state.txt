@@ -1,9 +1,11 @@
 [
+  // High-level game data 
   {
     "id": "gameData",
     "boardWidth": 9,
     "boardHeight": 9,
     "currLevel": 1,
+    "currRound": 2,
     "currentPhase": "Player_Pinning", // [Player_Pinning, Player_Planning, Player_Moving, Monster_Moving]
     "timer": "118.0593"
   },
