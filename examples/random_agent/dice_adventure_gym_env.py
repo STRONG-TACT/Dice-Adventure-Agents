@@ -1,6 +1,9 @@
 from json import loads
+import subprocess
+from time import sleep
 from typing import Any, Tuple, Union, Dict
 from gymnasium import Env
+from agent import DiceAdventureAgent
 from game.unity_socket import UnityWebSocket
 
 
@@ -8,47 +11,29 @@ class DiceAdventureGymEnv(Env):
     """
     Implements a custom gym environment for the Dice Adventure Unity game.
     """
-    def __init__(self, player: str, port: str, train_mode: True, game_executable_filepath: str):
+    def __init__(self, port: str, game_executable_filepath: str, player: str = 'dwarf'):
         """
         Init function for Dice Adventure gym environment.
-        :param player:      The player that will be used to play the game.
+        :param player:      The player that will be used to train the agent. Defaults to the Dwarf.
         :param port:        The custom port that will be used to connect the agent to the game instance.
                             You should choose a port that is currently not in use by your system.
-        :param train_mode:  A helper parameter to switch between training mode and play mode. When you test agents,
-                            you can set train_mode = False so that the step function simply takes an action and returns
-                            the next state.
         :param game_executable_filepath:  The location of the game executable
         """
         self.player = player
         self.port = port
-        self.train_mode = train_mode
-        self.socket_url = "ws://localhost:{}/hmt/{}".format(self.port, self.player)
-        self.unity_socket = UnityWebSocket(self.socket_url)
+        self.socket_url = "ws://localhost:{}/hmt/{}"
+        self.sockets = {'dwarf': None, 'giant': None, 'human': None}
 
         self.actions = ["up", "down", "left", "right", "wait", "undo", "submit", "pinga", "pingb", "pingc", "pingd"]
         self.player_names = ["dwarf", "giant", "human"]
 
         self._launch_game(game_executable_filepath)
 
-    def step(self, action):
-        """
-        Applies the given action to the game.
-        If self.train_mode == True, passes action to _step_train() and returns new information for RL model.
-        If self.train_mode == False, simply returns state obtained after taking action.
-
-        :param action:  (string) The action produced by the agent
-        :return:        (dict, float, bool, bool, dict) or (dict)
-        """
-        if self.train_mode:
-            return self._step_train(action)
-        else:
-            return self._step_play(action)
-
-    def _step_train(self, action: str) -> tuple[Any,
-                                                float,
-                                                Union[bool, Any],
-                                                bool,
-                                                Union[dict[str, Any]]]:
+    def step(self, action: str) -> tuple[Any,
+                                         float,
+                                         Union[bool, Any],
+                                         bool,
+                                         Union[dict[str, Any]]]:
         """
         Applies the given action to the game. Determines the next observation and reward, whether the training should
         terminate, whether training should be truncated, and additional info.
@@ -64,7 +49,7 @@ class DiceAdventureGymEnv(Env):
 
         Note: Although this framework is usually used for RL models, users can develop any kind of model with this code.
         """
-        next_state = self.execute_action(action)
+        next_state = self.execute_action(self.player, action)
 
         reward = self._get_reward()
 
@@ -73,18 +58,10 @@ class DiceAdventureGymEnv(Env):
         if terminated:
             new_obs, info = self.reset()
         else:
-            new_obs, info = self.get_state(), {}
+            new_obs, info = self.get_state(self.player), {}
         truncated = False
 
         return new_obs, reward, terminated, truncated, info
-
-    def _step_play(self, action: str) -> list[dict]:
-        """
-        Applies the given action to the game and returns the resulting state
-        :param action:  The action produced by the agent
-        :return:        The resulting state
-        """
-        return self.execute_action(action)
 
     def close(self):
         """
@@ -105,17 +82,26 @@ class DiceAdventureGymEnv(Env):
         """
         pass
 
-    def execute_action(self, game_action: str):
+    @staticmethod
+    def _get_reward():
+        """
+        Calculates the reward the agent should receive based on action taken.
+        :return: (int) The reward
+        """
+        return 0
+
+    def execute_action(self, player: str, game_action: str):
         """
         Executes the given action for the given player.
+        :param player:      The player the action is being applied to
         :param game_action: The action to take
         :return:            The resulting state after taking the given action
         """
         # TODO CAPTURE RESPONSE AND RETURN TO USER
-        self.unity_socket.execute_action(game_action)
-        return self.get_state()
+        self._get_socket(player).execute_action(game_action)
+        return self.get_state(player)
 
-    def get_state(self):
+    def get_state(self, player: str):
         """
         Gets the current state of the game.
 
@@ -131,7 +117,26 @@ class DiceAdventureGymEnv(Env):
             view (i.e. not obscured by black or gray squares), but static objects such as walls, stones, and traps,
             and shrines are returned if they've been previously observed.
         """
-        return _simplify_state(self.unity_socket.get_state(), self.player)
+        return _simplify_state(self._get_socket(player).get_state(), self.player)
+
+    def play(self, agents: list[tuple[str, DiceAdventureAgent]]) -> None:
+        """
+        Plays the game with the provided agents.
+        :param agents: A tuple containing the name of the player being controlled and the DiceAdventureAgent controlling
+                       that player.
+        :return:       None
+        """
+        while True:
+            for player_name, agent in agents:
+                state = self.get_state(player_name)
+                action = agent.take_action(state=state, actions=self.get_actions())
+                self.execute_action(player_name, action)
+            sleep(.1)
+
+    def _get_socket(self, player):
+        if self.sockets[player] is None:
+            self.sockets[player] = UnityWebSocket(self.socket_url.format(self.port, player))
+        return self.sockets[player]
 
     def get_actions(self):
         return self.actions
@@ -139,21 +144,14 @@ class DiceAdventureGymEnv(Env):
     def get_player_names(self):
         return self.player_names
 
-    @staticmethod
-    def _get_reward():
-        """
-        Calculates the reward the agent should receive based on action taken.
-        :return: (int) The reward
-        """
-        return 0
-
     def _launch_game(self, game_executable_filepath):
         command = [game_executable_filepath,
                    "-localMode",
                    "-hmtsocketurl", "ws://localhost",
                    "-hmtsocketport", "{}".format(self.port)]
         # subprocess.run(command)
-        subprocess.run(command, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+        subprocess.call(command, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+        sleep(5)
 
 
 #############
@@ -229,7 +227,3 @@ def get_player_id(player: str) -> str:
     """
     ids = {"dwarf": "C11", "giant": "C21", "human": "C31"}
     return ids[player]
-
-
-
-
