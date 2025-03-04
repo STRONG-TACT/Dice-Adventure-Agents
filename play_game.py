@@ -1,5 +1,5 @@
-from examples.random_agent.dice_adventure_gym_env import DiceAdventureGymEnv
-from examples.random_agent.dice_adventure_gym_env import get_player_id
+from agent_template.dice_adventure_gym_env import DiceAdventureGymEnv
+from agent_template.dice_adventure_gym_env import get_player_id
 from examples.random_agent.agent import DiceAdventureAgent
 
 
