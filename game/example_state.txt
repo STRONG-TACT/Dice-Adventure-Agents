@@ -1,0 +1,120 @@
+[
+  {
+    "id": "gameData",
+    "boardWidth": 9,
+    "boardHeight": 9,
+    "currLevel": 1,
+    "currentPhase": "Player_Pinning", // [Player_Pinning, Player_Planning, Player_Moving, Monster_Moving]
+    "timer": "118.0593"
+  },
+  // Character object (3 total)
+  {
+    "entityType": "Character",
+    "objKey": "C1", // [C1 (dwarf), C2 (giant), C3 (human)]
+    "id": "C11", // [C11 (dwarf), C21 (giant), C31 (human)]
+    "sightRange": 1,
+    "monsterDie": "D6+0",
+    "trapDie": "D8+0",
+    "stoneDie": "D4+0",
+    "ready": false, // [true, false]
+    "dead": false, // [true, false]
+    "lives": 3,
+    "health": 3,
+    "respawnCounter": 0,
+    "actionPoints": 6,
+    "actionPlan": [left, down], // [left, right, up, down, wait, submit]
+    "pinCursorX": 2,
+    "pinCursorY": 8,
+    "sight_status": "visible", // [visible, hidden, unexplored]
+    "x": 2,
+    "y": 8
+  },
+  // Shrine object (3 total)
+  {
+    "entityType": "Shrine",
+    "objKey": "3G", // [1G (dwarf), 2G (giant), 3G (human)]
+    "id": "3G1", // [1G1 (dwarf), 2G1 (giant), 3G1 (human)]
+    "character": "C31", // [C11 (dwarf), C21 (giant), C31 (human)] - See Character object above
+    "reached": false, // [true, false]
+    "sight_status": "hidden", // [visible, hidden, unexplored]
+    "x": 0,
+    "y": 7
+  },
+  // Wall object
+  {
+    "entityType": "Wall",
+    "objKey": "##",
+    "id": "##16",
+    "x": 0,
+    "y": 1,
+    "sight_status": "hidden", // [visible, hidden, unexplored]
+  },
+  // Open grid cell object
+  {
+    "entityType": "Open",
+    "objKey": "..",
+    "id": "..7",
+    "x": 0,
+    "y": 7,
+    "sight_status": "visible", // [visible, hidden, unexplored]
+  },
+  // Unexplored grid cell object
+  {
+    "id": "UE-41",
+    "entityType"": "Cell",
+    "objKey": "UE",
+    "sight_status": "unexplored", // [visible, hidden, unexplored]
+    "x": 7,
+    "y": 8
+  },
+  // Rock/Stone object
+  {
+    "entityType": "Rock",
+    "objKey": "S1", // [S1, S2, S3] - analogous to small, medium, large
+    "id": "S12", // [S1 + index of when instantiated] - i.e. 4 total rocks of type S1 will have IDs {S11, S12, S13, S14}
+    "x": 1,
+    "y": 3,
+    "challengeDie": "D0+5",
+    "sight_status": "hidden", // [visible, hidden, unexplored]
+  },
+  // Monster object
+  {
+    "entityType": "monster",
+    "objKey": "M2", // [M1, M2, M3, M4] - analogous to small, medium, large, extra-large
+    "id": "M23", // [M2 + index of when instantiated] - i.e. 4 total monsters of type M2 will have IDs {M21, M22, M23, M24}
+    "challengeDie": "D6+0",
+    "x": 1,
+    "y": 4,
+    "sight_status": "visible", // [visible, hidden, unexplored]
+  },
+  // Trap object
+  {
+    "entityType": "Trap",
+    "objKey": "T1", // [T1, T2, T3] - analogous to small, medium, large
+    "id": "T11", // [S1 + index of when instantiated] - i.e. 4 total traps of type T1 will have IDs {T11, T12, T13, T14}
+    "x": 1,
+    "y": 7,
+    "challengeDie": "D4+0",
+    "sight_status": "visible", // [visible, hidden, unexplored]
+  },
+  // Tower/Goal object
+  {
+    "entityType": "Goal",
+    "objKey": "**",
+    "subGoalCount": 0, // # of shrines collected
+    "id": "**1",
+    "x": 7,
+    "y": 4,
+    "sight_status": "hidden", // [visible, hidden, unexplored]
+  },
+  // Pin object
+  {
+    "entityType": "Pin",
+    "objKey": "PA" // [PA, PB, PC, PD]
+    "id": "PA2" // [PA + index of when instantiated] - i.e. 4 total Pins of type PA will have IDs {PA1, PA2, PA3, PA4},
+    "placedBy": // [C11 (dwarf), C21 (giant), C31 (human)] - See Character object above
+    "x": 5,
+    "y": 0,
+    "sight_status": "visible", // [visible, hidden, unexplored]
+  }
+]
