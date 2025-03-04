@@ -126,6 +126,13 @@ class DiceAdventureGymEnv(Env):
                        that player.
         :return:       None
         """
+        for player_name, _ in agents:
+            print(f"***Registering agent for: {player_name}***")
+            # Register with game
+            self._get_socket(player_name).register(player_name)
+            print(f"***Agent for: ({player_name}) Registered.***")
+        # Wait for unity to be 'truly' ready for actions
+        sleep(1)
         while True:
             for player_name, agent in agents:
                 state = self.get_state(player_name)
@@ -137,6 +144,11 @@ class DiceAdventureGymEnv(Env):
         if self.sockets[player] is None:
             self.sockets[player] = UnityWebSocket(self.socket_url.format(self.port, player))
         return self.sockets[player]
+
+    def _register(self, agent_id):
+        # url = self.unity_socket_url.format(self.port, self.player.lower())
+        # unity_socket.register(url, agent_id)
+        self.websocket.register(agent_id)
 
     def get_actions(self):
         return self.actions
