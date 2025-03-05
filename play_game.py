@@ -5,7 +5,7 @@ from examples.random_agent.agent import DiceAdventureAgent
 
 def main():
     # Set up environment
-    env = DiceAdventureGymEnv(port='4649', game_executable_filepath='C:/Users/qzhang490/Lab/Dice-Adventure-Agents/game/V1.0.5/DiceAdventure.exe')
+    env = DiceAdventureGymEnv(port='4649', game_executable_filepath='/DiceAdventure.exe')
     # sLoad agents
     agents = [('dwarf', DiceAdventureAgent('dwarf', get_player_id('dwarf'))),
               ('giant', DiceAdventureAgent('giant', get_player_id('giant'))),
