@@ -1,9 +1,11 @@
 from json import loads
 import subprocess
+import copy
 from time import sleep
+from threading import Thread
 from typing import Any, Tuple, Union, Dict
 from gymnasium import Env
-from agent import DiceAdventureAgent
+from examples.random_agent.agent import DiceAdventureAgent
 from game.unity_socket import UnityWebSocket
 
 
@@ -27,7 +29,7 @@ class DiceAdventureGymEnv(Env):
         self.actions = ["up", "down", "left", "right", "wait", "undo", "submit", "pinga", "pingb", "pingc", "pingd"]
         self.player_names = ["dwarf", "giant", "human"]
 
-        self._launch_game(game_executable_filepath)
+        _launch_game(game_executable_filepath, port)
 
     def step(self, action: str) -> tuple[Any,
                                          float,
@@ -117,7 +119,7 @@ class DiceAdventureGymEnv(Env):
             view (i.e. not obscured by black or gray squares), but static objects such as walls, stones, and traps,
             and shrines are returned if they've been previously observed.
         """
-        return _simplify_state(self._get_socket(player).get_state(), self.player)
+        return _simplify_state(self._get_socket(player).get_state(), player)
 
     def play(self, agents: list[tuple[str, DiceAdventureAgent]]) -> None:
         """
@@ -156,14 +158,18 @@ class DiceAdventureGymEnv(Env):
     def get_player_names(self):
         return self.player_names
 
-    def _launch_game(self, game_executable_filepath):
-        command = [game_executable_filepath,
-                   "-localMode",
-                   "-hmtsocketurl", "ws://localhost",
-                   "-hmtsocketport", "{}".format(self.port)]
-        # subprocess.run(command)
-        subprocess.call(command, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
-        sleep(5)
+def _launch_game(game_executable_filepath, port):
+    game_thread = Thread(target=_launch_game_thread, args=(game_executable_filepath, port))
+    game_thread.start()
+
+def _launch_game_thread(game_executable_filepath, port):
+    command = [game_executable_filepath,
+                "-localMode",
+                "-hmtsocketurl", "ws://localhost",
+                "-hmtsocketport", "{}".format(port)]
+    # subprocess.run(command)
+    subprocess.call(command, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+    sleep(5)
 
 
 #############
@@ -228,7 +234,7 @@ def _find_player_obj(scene: list[dict], player: str) -> [dict, None]:
     pid = get_player_id(player)
     for obj in scene:
         if obj.get('id') == pid:
-            return copy(obj)
+            return copy.copy(obj)
 
 
 def get_player_id(player: str) -> str:
