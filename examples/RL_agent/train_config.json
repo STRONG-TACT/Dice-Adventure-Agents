@@ -16,16 +16,20 @@
   },
     "TRAINING_SETTINGS": {
 	"GLOBAL": {
-	  "device": "cuda",
+	  "device": "cpu",
 	  "model_number": 1,
 	  "num_envs": 4,
-	  "num_time_steps": 100000000000,
+	  "num_time_steps": 10000000,
 	  "players": ["Giant", "Human", "Dwarf"],
 	  "save_threshold": 50000
 	},
 	"PPO": {
 	  "batch_size": 64,
-	  "n_steps": 2048
+	  "n_steps": 2048,
+	  "n_epochs": 10,
+	  "learning_rate": 0.0003,
+	  "tensorboard_log": "./tensorboard_logs_small_with_reward/",
+	  "verbose": 1
 	}
   }
 }
