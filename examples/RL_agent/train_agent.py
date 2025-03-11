@@ -8,8 +8,11 @@ from stable_baselines3.common.vec_env import SubprocVecEnv
 from tqdm import tqdm
 from json import loads
 import tensorflow as tf
+import os
+import numpy as np
 
-
+# Create log directory if it doesn't exist
+os.makedirs('training_logs', exist_ok=True)
 
 ############
 # TRAINING #
@@ -31,16 +34,16 @@ def train_ppo(config):
                          env_args=kwargs)
     # print('vec_env')
 
-    model = PPO("CnnPolicy",
+    model = PPO("MlpPolicy",
                 vec_env,
                 verbose=1,
                 device=config["TRAINING_SETTINGS"]["GLOBAL"]["device"],
-                tensorboard_log='tensorboard_logs')
+                tensorboard_log='tensorboard_logs_small_with_reward/')
 
     print('model')
 
     model.learn(total_timesteps=config["TRAINING_SETTINGS"]["GLOBAL"]["num_time_steps"],
-                callback=save_callback)
+                callback=save_callback, log_interval=10)
     print('learn')
     # model.save(MODEL_DIR.format(save_callback.model_number) + "dice_adventure_ppo_model_final")
     print("DONE TRAINING!")
@@ -84,17 +87,95 @@ class SaveCallback(BaseCallback, ABC):
         self.checkpoint = 1
         self.pbar = tqdm(total=total_time_steps)
 
+        # Track time between rewards for each env
+        self.num_envs = None  # Will be set in _on_training_start
+        self.last_reward_steps = {}  # {env_idx: last_step}
+        self.last_shrine_steps = {}  # {env_idx: last_step}
+        self.last_tower_steps = {}   # {env_idx: last_step}
+        
         self._setup_directories()
 
     def _setup_directories(self):
         makedirs(self.save_dir, exist_ok=True)
 
+    def _on_training_start(self):
+        # Get number of environments from vectorized env
+        self.num_envs = self.training_env.num_envs
+        # Initialize tracking for each env
+        for i in range(self.num_envs):
+            self.last_reward_steps[i] = 0
+            self.last_shrine_steps[i] = 0
+            self.last_tower_steps[i] = 0
+
     def _on_step(self):
         self.time_steps += 1
         self.pbar.update(1)
 
+        # Process rewards from all envs
+        rewards = self.locals["rewards"]  # Array of immediate rewards at this step
+
+        # Track steps between rewards for each env
+        for env_idx, reward in enumerate(rewards):
+            if reward > 0:  # Only track when we actually get a reward
+                steps_since_last = self.time_steps - self.last_reward_steps[env_idx]
+                self.last_reward_steps[env_idx] = self.time_steps
+                
+                # Log to a text file for each environment
+                with open(f"training_logs/env_{env_idx}_rewards.txt", "a") as log_file:
+                    log_file.write(f"{self.time_steps},{steps_since_last}\n")
+                
+                if reward == 1:  # Shrine reward
+                    shrine_steps = self.time_steps - self.last_shrine_steps[env_idx]
+                    self.last_shrine_steps[env_idx] = self.time_steps
+                    with open(f"training_logs/env_{env_idx}_shrines.txt", "a") as log_file:
+                        log_file.write(f"{self.time_steps},{shrine_steps}\n")
+                    
+                elif reward == 10:  # Tower reward
+                    tower_steps = self.time_steps - self.last_tower_steps[env_idx]
+                    self.last_tower_steps[env_idx] = self.time_steps
+                    with open(f"training_logs/env_{env_idx}_towers.txt", "a") as log_file:
+                        log_file.write(f"{self.time_steps},{tower_steps}\n")
+
         if self.time_steps % self.save_threshold == 0:
             self._save_model()
+        
+        return True
+
+        
+        # Get current level for each env
+        # env_states = self.training_env.get_attr("game")  # Get game attribute from all envs
+        # current_levels = [
+        #     env.get_state()["content"]["gameData"]["currLevel"] 
+        #     if env is not None else None 
+        #     for env in env_states
+        # ]
+
+        # Track steps between rewards for each env
+        # for env_idx, (reward, curr_level) in enumerate(zip(rewards, current_levels)):
+        #     if reward > 0 and curr_level is not None:  # Only track when we actually get a reward
+        #         steps_since_last = self.time_steps - self.last_reward_steps.get(env_idx, 0)
+        #         self.last_reward_steps[env_idx] = self.time_steps
+                
+        #         # Log to a text file for each environment
+        #         with open(f"training_logs/env_{env_idx}_rewards.txt", "a") as log_file:
+        #             log_file.write(f"{self.time_steps},{steps_since_last},{curr_level},{reward}\n")
+                
+        #         if reward == 1:  # Shrine reward
+        #             shrine_steps = self.time_steps - self.last_shrine_steps.get(env_idx, 0)
+        #             self.last_shrine_steps[env_idx] = self.time_steps
+        #             with open(f"training_logs/env_{env_idx}_shrines.txt", "a") as log_file:
+        #                 log_file.write(f"{self.time_steps},{shrine_steps},{curr_level}\n")
+                    
+        #         elif reward == 10:  # Tower/Level completion reward
+        #             tower_steps = self.time_steps - self.last_tower_steps.get(env_idx, 0)
+        #             self.last_tower_steps[env_idx] = self.time_steps
+        #             with open(f"training_logs/env_{env_idx}_towers.txt", "a") as log_file:
+        #                 log_file.write(f"{self.time_steps},{tower_steps},{curr_level}\n")
+
+        # if self.time_steps % self.save_threshold == 0:
+        #     self._save_model()
+        
+        # return True
 
     def _save_model(self):
         self.model.save(self.save_dir + "dice_adventure_ppo_modelchkpt-{}".format(self.checkpoint))
