@@ -8,6 +8,10 @@ from websockets.sync.client import connect
 class UnityWebSocket:
     def __init__(self, url):
         self.url = url
+        self.connection = None
+        self.connect()
+
+    def connect(self):
         while True:
             try:
                 self.connection = connect(self.url, open_timeout=None, close_timeout=None)
@@ -42,6 +46,7 @@ class UnityWebSocket:
                 self.connection.send(message)
                 return self.connection.recv()
             except (ConnectionClosedOK, ConnectionClosedError, ConnectionClosed):
-                self.connection = connect(self.url, open_timeout=None, close_timeout=None)
-            sleep(0.5)
+                sleep(0.5)
+                self.connect()
+            
 
