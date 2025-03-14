@@ -10,6 +10,10 @@ import json
 from math import ceil
 import logging
 import os
+from sb3_contrib import MaskablePPO
+from sb3_contrib.common.maskable.policies import MaskableActorCriticPolicy
+from sb3_contrib.common.wrappers import ActionMasker
+
 
 
 class DiceAdventurePythonEnvRL(Env):
@@ -41,7 +45,7 @@ class DiceAdventurePythonEnvRL(Env):
         self.player = player
         self.id = id_
         self.kwargs = kwargs
-        self.actions = ["up", "down", "left", "right", "wait", "undo", "submit"]
+        self.actions = ["left", "riight", "up", "down", "wait", "undo", "submit", "pinga", "pingb", "pingc", "pingd"]
         self.player_names = ["Dwarf", "Giant", "Human"]
     
 
@@ -61,11 +65,23 @@ class DiceAdventurePythonEnvRL(Env):
                       "Human": self.config["OBJECT_INFO"]["OBJECT_CODES"]["C3"]["SIGHT_RANGE"]}
         self.max_mask_radius = max(self.masks.values())
         self.local_mask_radius = self.masks[self.player]
-        self.action_map = {0: 'left', 1: 'right', 2: 'up', 3: 'down', 4: 'wait',
-                           5: 'submit', 6: 'undo'} #6: 'pinga', 7: 'pingb', 8: 'pingc', 9: 'pingd', 10: 'undo'}
+        self.action_map = {
+            0: 'left',
+            1: 'right', 
+            2: 'up',
+            3: 'down',
+            4: 'wait',
+            5: 'undo',
+            6: 'submit',
+            7: 'pinga',
+            8: 'pingb',
+            9: 'pingc',
+            10: 'pingd'
+        }
 
-        num_actions = len(self.action_map)
-        self.action_space = spaces.Discrete(num_actions)
+        # Define action space size
+        self.num_actions = len(self.action_map)
+        self.action_space = spaces.Discrete(self.num_actions)
         # set number of actions taken to 0
         self.num_actions = 0
         # The observation will be the coordinate of the agent
@@ -111,6 +127,33 @@ class DiceAdventurePythonEnvRL(Env):
 
         # Add tracking of reached shrines
         self.reached_shrines = set()  # Persist across steps
+
+    
+    def action_masks(self):
+        """Returns a mask of valid actions for the current state"""
+        try:
+            state = self.get_state()
+            if state is None:
+                print("Warning: state is None, returning all-true mask")
+                return np.ones(self.action_space.n, dtype=np.bool_)
+
+            current_phase = state["content"]["gameData"]["currentPhase"]
+            mask = np.zeros(self.action_space.n, dtype=np.bool_)
+            
+            if current_phase == "Player_Pinning":
+                # Allow ping actions and submit during pinning phase
+                mask[7:] = True  # submit, undo, pinga, pingb, pingc, pingd
+            else:  # Planning phase
+                # Allow movement actions, wait, undo, and submit during planning phase
+                mask[0:7] = True   # left, right, up, down, wait, submit, undo
+            
+            # Add debug print
+            # print(f"Phase: {current_phase}, Mask shape: {mask.shape}, Mask: {mask}")
+            return mask
+        except Exception as e:
+            print(f"Error creating action mask: {e}")
+            # Return all actions as valid in case of error
+            return np.ones(self.action_space.n, dtype=np.bool_)
 
     def step(self, action) -> tuple:
         """
@@ -477,6 +520,7 @@ class DiceAdventurePythonEnvRL(Env):
             return {"status": "ERROR", "content": {"scene": [], "gameData": {"currLevel": 0}}}
 
     def get_actions(self):
+        # check which phase we are in 
         return self.actions
 
     def get_player_names(self):
