@@ -8,9 +8,13 @@ from websockets.sync.client import connect
 class UnityWebSocket:
     def __init__(self, url):
         self.url = url
-        self.connection = connect(self.url, open_timeout=None, close_timeout=None)
-        self.retry_sleep_time_seconds = .5
-
+        while True:
+            try:
+                self.connection = connect(self.url, open_timeout=None, close_timeout=None)
+                break
+            except (ConnectionClosedOK, ConnectionClosedError, ConnectionClosed):
+                sleep(1)
+        
     def execute_action(self, action):
         # Command to send to Game env
         action_command = {"command": "execute_action", "action": action}
@@ -37,11 +41,7 @@ class UnityWebSocket:
             try:
                 self.connection.send(message)
                 return self.connection.recv()
-            except ConnectionClosedOK:
+            except (ConnectionClosedOK, ConnectionClosedError, ConnectionClosed):
                 self.connection = connect(self.url, open_timeout=None, close_timeout=None)
-            except ConnectionClosedError:
-                self.connection = connect(self.url, open_timeout=None, close_timeout=None)
-            except ConnectionClosed:
-                self.connection = connect(self.url, open_timeout=None, close_timeout=None)
-            sleep(self.retry_sleep_time_seconds)
+            sleep(0.5)
 
