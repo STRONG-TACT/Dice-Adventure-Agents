@@ -143,7 +143,8 @@ class DiceAdventurePythonEnvRL(Env):
             
             if current_phase == "Player_Pinning":
                 # Allow ping actions and submit during pinning phase
-                mask[6:] = True  # submit, undo, pinga, pingb, pingc, pingd
+                mask[0:4] = True  # left, right, up, down (support pin cursor placement)
+                mask[6:] = True  # submit, pinga, pingb, pingc, pingd (support pin selection)
             else:  # Planning phase
                 # Allow movement actions, wait, undo, and submit during planning phase
                 mask[0:7] = True   # left, right, up, down, wait, submit, undo
