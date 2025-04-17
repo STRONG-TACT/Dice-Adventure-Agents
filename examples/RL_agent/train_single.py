@@ -12,15 +12,16 @@ import logging
 import sys
 import socket
 
-# Set up logging
+# # Set up logging
 logging.basicConfig(
-    level=logging.INFO,
+    level=logging.DEBUG,
     format='%(asctime)s - %(levelname)s - %(message)s',
     handlers=[
         logging.StreamHandler(sys.stdout),
         logging.FileHandler('training.log')
     ]
 )
+
 logger = logging.getLogger(__name__)
 
 class RewardMonitorCallback(BaseCallback):
@@ -78,8 +79,8 @@ def train_single_env():
     
     logging.info("Creating environment...")
     env = DiceAdventurePythonEnvRL(
-        game_executable_filepath="/Users/thatavery/Documents/TAIL/new_folder/Dice-Adventure-Agents/DiceAdventure_MacOS_Build.app",
-        port="8080",
+        game_executable_filepath="/Users/thatavery/Documents/TAIL/new_folder/Dice-Adventure-Agents/DiceAdventure.app",
+        port="8090",
         player="human",
         train_mode=True
     )

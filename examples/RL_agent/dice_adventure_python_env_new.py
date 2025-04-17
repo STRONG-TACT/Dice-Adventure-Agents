@@ -67,6 +67,7 @@ class DiceAdventurePythonEnvRL(Env):
         self.socket_url = "ws://localhost:{}/hmt/{}"
         self.game_executable_filepath = game_executable_filepath
 
+
         #################
         # GAME SETTINGS #
         #################
@@ -112,6 +113,9 @@ class DiceAdventurePythonEnvRL(Env):
         # Add tracking of reached shrines
         self.reached_shrines = set()  # Persist across steps
 
+        # Add tracking of pins dropped in current phase
+        self.pins_dropped_this_phase = 0
+
         # Add game process tracking
         self.game_process = None
         self.game_thread = None
@@ -120,6 +124,9 @@ class DiceAdventurePythonEnvRL(Env):
         # if not self.launch_game(game_executable_filepath, port):
         #     raise RuntimeError("Failed to launch the game. Please check if the game executable exists and is accessible.")
         # self.launch_game(game_executable_filepath, port)
+
+        # _launch_game(game_executable_filepath, port)
+
 
 
     
@@ -154,6 +161,7 @@ class DiceAdventurePythonEnvRL(Env):
         """Execute one step in the environment"""
         try:
             if self.train_mode:
+                print("Training mode")
                 return self._step_train(action)
                 
             logging.info(f"Executing action: {action}")
@@ -223,6 +231,7 @@ class DiceAdventurePythonEnvRL(Env):
 
     def _step_train(self, action):
         try:
+            # print("Training mode")
             action = int(action)
             self.num_actions += 1
             logging.debug((f"Env {self.id} - {self.player} takes action: {action} ({self.action_map[action]})"))
@@ -341,10 +350,14 @@ class DiceAdventurePythonEnvRL(Env):
                     print(f"player_obj: {player_obj}")
 
 
-               
+                if "x" not in obj or "y" not in obj:
+                    # FOW, cannot see this object
+                    continue
                
                 # set visibility of cell (unexplored, hidden, visible)
                 tensor[channels[f"{sight_status.upper()}"], obj["y"], obj["x"]] = 1
+
+                
                 
 
                 if entity_type in enemies:
@@ -420,6 +433,7 @@ class DiceAdventurePythonEnvRL(Env):
     def reset(self, seed=None):
         self.num_actions = 0
         self.reached_shrines = set()
+        self.pins_dropped_this_phase = 0  # Reset pin counter on reset
         if seed:
             np.random.seed(seed)
         state = self.get_state(self.player)
@@ -461,8 +475,10 @@ class DiceAdventurePythonEnvRL(Env):
         return self.get_state(player)
 
     def _get_socket(self, player):
+        # check if game is already running, otherwise sleep
+        
         if self.sockets[player] is None:
-            sleep(20)
+            sleep(5)
             self.sockets[player] = UnityWebSocket(self.socket_url.format(self.port, player))
         return self.sockets[player]
     
@@ -514,7 +530,7 @@ s
 
     @staticmethod
     def get_player_code(player):
-        codes = {"Dwarf": "C1", "Giant": "C2", "Human": "C3"}
+        codes = {"dwarf": "C1", "giant": "C2", "human": "C3"}
         return codes[player]
 
     def _get_reward(self, state, next_state):
@@ -525,6 +541,7 @@ s
         3. Health loss penalties (proportional to max health)
         4. Team-based penalties (if any character loses all health)
         5. Round-based decay (0.95^rounds)
+        6. Penalty for dropping multiple pins in same phase (-1)
         
         Returns: float - The calculated reward
         """
@@ -536,7 +553,6 @@ s
                 print(f"[Env {self.id}-{self.player}] Level completed!")
                 reward += 10
                 return reward
-           
 
             # Check for newly reached shrines
             for obj in next_state[1:]:
@@ -548,6 +564,26 @@ s
                     reward += 1
                     print(f"[Env {self.id}-{self.player}] New shrine reached: {obj.get('objKey')}, "
                           f"Total shrines: {len(self.reached_shrines)}")
+
+            # Check for pin drops and apply penalty
+            current_phase = state[0]["currentPhase"]
+            next_phase = next_state[0]["currentPhase"]
+            
+            # If we're in pinning phase and dropped a pin
+            if current_phase == "Player_Pinning":
+                # Check if a pin was dropped by looking at the action plan
+                player_obj = _find_player_obj(next_state, self.player)
+                if player_obj and player_obj.get("actionPlan"):
+                    last_action = player_obj["actionPlan"][-1]
+                    if last_action.startswith("ping"):
+                        self.pins_dropped_this_phase += 1
+                        if self.pins_dropped_this_phase > 1:
+                            reward -= 1  # Penalty for dropping multiple pins
+                            print(f"[Env {self.id}-{self.player}] Penalty for dropping multiple pins in same phase")
+            
+            # Reset pin counter when phase changes
+            if current_phase != next_phase:
+                self.pins_dropped_this_phase = 0
 
             return reward
 
@@ -640,7 +676,7 @@ def _launch_game_thread(game_executable_filepath, port):
     command = f"open -n ./{game_executable_filepath} --args -localMode -stepTime 0 -hmtsocketurl ws://localhost -hmtsocketport {port}"
     
     # Use subprocess.Popen with shell=True to execute the command like in the terminal
-    process = subprocess.Popen(
+    process = subprocess.call(
         command,
         shell=True,
         stdout=subprocess.PIPE,
@@ -746,7 +782,7 @@ def get_player_from_id(player_id: str) -> str:
     :param player_id: The ID of the player
     :return: The player's name
     """
-    ids = {"C11": "Dwarf", "C21": "Giant", "C31": "Human"}
+    ids = {"C11": "dwarf", "C21": "giant", "C31": "human"}
     return ids[player_id]
 
 def get_expected_strength(dice_faces: int, modifier: int) -> float:
