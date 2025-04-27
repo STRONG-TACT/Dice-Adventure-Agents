@@ -1,0 +1,94 @@
+{
+    "PIN_VALUES": {
+        "PA": 1,
+        "PB": 2,
+        "PC": 3,
+        "PD": 4
+    },
+
+    "PLAYER_CODES": {
+        "C11": "DWARF",
+        "C21": "GIANT",
+        "C31": "HUMAN"
+    },
+
+    "DICE_VALUES": {
+        "DWARF_MONSTER": "D6+0",
+        "GIANT_MONSTER": "D6+0",
+        "HUMAN_MONSTER": "D8+0",
+
+        "DWARF_TRAP": "D8+0",
+        "GIANT_TRAP": "D4+0",
+        "HUMAN_TRAP": "D6+0",
+
+        "DWARF_ROCK": "D4+0",
+        "GIANT_ROCK": "D8+0",
+        "HUMAN_ROCK": "D6+0"
+    },
+
+    "CHANNEL_MAPPING": {
+        "BOARD_BOUNDARY": 0,
+        "WALL": 1,
+        "TOWER": 2,
+
+        "DWARF_POSITION": 3,
+        "GIANT_POSITION": 4,
+        "HUMAN_POSITION": 5,
+    
+
+        "PLAYER_IS_DWARF": 6,
+        "PLAYER_IS_GIANT": 7,
+        "PLAYER_IS_HUMAN": 8,
+        
+        "DWARF_SHRINE": 9,
+        "GIANT_SHRINE": 10,
+        "HUMAN_SHRINE": 11,
+
+        "MONSTER_PRESCENCE": 12,
+        "TRAP_PRESCENCE": 13,
+        "ROCK_PRESCENCE": 14,
+
+        "MONSTER_STRENGTH": 15,
+        "TRAP_STRENGTH": 16,
+        "ROCK_STRENGTH": 17,
+        
+        "HEALTH": 18,
+        "LIVES": 19,
+        "ACTION_POINTS": 20,
+        
+        "ACTION_1": 21,
+        "ACTION_2": 22,
+        "ACTION_3": 23,
+        "ACTION_4": 24,
+    
+        "ACTION_5": 25,
+        "ACTION_6": 26,
+        
+        "DWARF_PIN": 27,
+        "GIANT_PIN": 28,
+        "HUMAN_PIN": 29,
+        
+        "PINNING_PHASE": 30,
+        "ACTION_PLANNING_PHASE": 31,
+
+        "PIN_CURSOR": 32,
+        
+        "DWARF_MONSTER_SKILL": 33,
+        "DWARF_TRAP_SKILL": 34,
+        "DWARF_ROCK_SKILL": 35,
+
+        "GIANT_MONSTER_SKILL": 36,
+        "GIANT_TRAP_SKILL": 37,
+        "GIANT_ROCK_SKILL": 38,
+
+        "HUMAN_MONSTER_SKILL": 39,
+        "HUMAN_TRAP_SKILL": 40,
+        "HUMAN_ROCK_SKILL": 41,
+
+        "VISIBLE": 42, 
+        "HIDDEN": 43,
+        "UNEXPLORED": 44
+    },
+    "NUM_CHANNELS": 45,
+    "TENSOR_SHAPE": [20, 20]
+} 
