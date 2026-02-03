@@ -5,7 +5,11 @@ from examples.random_agent.agent import DiceAdventureAgent
 
 def main():
     # Set up environment
+    # For Windows executable
     env = DiceAdventureGymEnv(port='4649', game_executable_filepath='/DiceAdventure.exe')
+    # For MacOS executable
+    # env = DiceAdventureGymEnv(port='4649', game_executable_filepath='./DiceAdventure_MacOS_Build.app')
+
     # sLoad agents
     agents = [('dwarf', DiceAdventureAgent('dwarf', get_player_id('dwarf'))),
               ('giant', DiceAdventureAgent('giant', get_player_id('giant'))),
